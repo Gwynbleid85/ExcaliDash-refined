@@ -6,6 +6,7 @@ import { Logo } from '../components/Logo';
 import * as api from '../api';
 import { getPasswordPolicy, validatePassword } from '../utils/passwordPolicy';
 import { PasswordRequirements } from '../components/PasswordRequirements';
+import { AuthStatusErrorPanel } from '../components/AuthStatusErrorPanel';
 
 export const Register: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,6 +19,8 @@ export const Register: React.FC = () => {
   const {
     register,
     authEnabled,
+    authStatusError,
+    retryAuthStatus,
     oidcEnabled,
     oidcEnforced,
     oidcProvider,
@@ -55,6 +58,7 @@ export const Register: React.FC = () => {
   };
 
   useEffect(() => {
+    if (authStatusError) return;
     if (authLoading || authEnabled === null) return;
     if (authOnboardingRequired) {
       navigate('/auth-setup', { replace: true });
@@ -71,7 +75,7 @@ export const Register: React.FC = () => {
     if (isAuthenticated) {
       navigate('/', { replace: true });
     }
-  }, [authEnabled, authLoading, authOnboardingRequired, isAuthenticated, navigate, oidcEnforced]);
+  }, [authEnabled, authLoading, authOnboardingRequired, authStatusError, isAuthenticated, navigate, oidcEnforced]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,6 +164,9 @@ export const Register: React.FC = () => {
           )}
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {authStatusError && (
+            <AuthStatusErrorPanel message={authStatusError} onRetry={retryAuthStatus} />
+          )}
           {error && (
             <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
               <div className="text-sm text-red-800 dark:text-red-200">{error}</div>

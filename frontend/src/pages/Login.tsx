@@ -6,6 +6,7 @@ import * as api from '../api';
 import { USER_KEY } from '../utils/impersonation';
 import { getPasswordPolicy, validatePassword } from '../utils/passwordPolicy';
 import { PasswordRequirements } from '../components/PasswordRequirements';
+import { AuthStatusErrorPanel } from '../components/AuthStatusErrorPanel';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,6 +19,8 @@ export const Login: React.FC = () => {
     login,
     logout,
     authEnabled,
+    authStatusError,
+    retryAuthStatus,
     oidcEnabled,
     oidcEnforced,
     oidcProvider,
@@ -42,6 +45,7 @@ export const Login: React.FC = () => {
   }, [oidcErrorCode, oidcErrorMessage]);
 
   useEffect(() => {
+    if (authStatusError) return;
     if (authLoading || authEnabled === null) return;
     if (authOnboardingRequired) {
       navigate('/auth-setup', { replace: true });
@@ -69,6 +73,7 @@ export const Login: React.FC = () => {
     authEnabled,
     authLoading,
     authOnboardingRequired,
+    authStatusError,
     bootstrapRequired,
     isAuthenticated,
     mustReset,
@@ -171,6 +176,9 @@ export const Login: React.FC = () => {
           )}
         </div>
         <form className="mt-8 space-y-6" onSubmit={mustReset ? handleMustReset : handleSubmit}>
+          {authStatusError && (
+            <AuthStatusErrorPanel message={authStatusError} onRetry={retryAuthStatus} />
+          )}
           {error && (
             <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
               <div className="text-sm text-red-800 dark:text-red-200">{error}</div>
