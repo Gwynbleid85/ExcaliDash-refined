@@ -465,7 +465,7 @@ Common flags:
 </details>
 
 # Credits
-
+If you find ExcaliDash useful, please consider [sponsoring](https://github.com/sponsors/ZimengXiong)
 - Example designs from:
   - https://github.com/Prakash-sa/system-design-ultimatum/tree/main
   - https://github.com/kitsteam/excalidraw-examples/tree/main
