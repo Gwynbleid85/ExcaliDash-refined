@@ -106,10 +106,20 @@ export const registerDrawingRoutes = (
         collectionFilterKey = "trash";
       } else {
         const collection = await prisma.collection.findFirst({
-          where: { id: normalizedCollectionId, userId: req.user.id },
+          where: {
+            id: normalizedCollectionId,
+            OR: [
+              { userId: req.user.id },
+              { visibility: "shared" },
+            ],
+          },
         });
         if (!collection) {
           return res.status(404).json({ error: "Collection not found" });
+        }
+        // For shared collections, drop the userId filter so all users' drawings are visible.
+        if (collection.visibility === "shared") {
+          delete where.userId;
         }
         where.collectionId = normalizedCollectionId;
         collectionFilterKey = `id:${normalizedCollectionId}`;
@@ -391,7 +401,13 @@ export const registerDrawingRoutes = (
 
     if (targetCollectionId && !isTrashCollectionId(targetCollectionId, req.user.id)) {
       const collection = await prisma.collection.findFirst({
-        where: { id: targetCollectionId, userId: req.user.id },
+        where: {
+          id: targetCollectionId,
+          OR: [
+            { userId: req.user.id },
+            { visibility: "shared", sharePermission: "edit" },
+          ],
+        },
       });
       if (!collection) return res.status(404).json({ error: "Collection not found" });
     } else if (targetCollectionIdRaw === "trash") {

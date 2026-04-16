@@ -222,13 +222,13 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
       <div
         id={`drawing-card-${drawing.id}`}
         onContextMenu={handleContextMenu}
-        draggable={!isRenaming && !isShared}
+        draggable={!isRenaming && drawing.accessLevel === 'owner'}
         onDragStart={(e) => {
           if (isRenaming) {
             e.preventDefault();
             return;
           }
-          if (isShared) {
+          if (drawing.accessLevel !== 'owner') {
             e.preventDefault();
             return;
           }
@@ -313,8 +313,7 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
                 e.stopPropagation();
                 const canRename =
                   !isTrash &&
-                  (!isShared ||
-                    drawing.accessLevel === 'edit' ||
+                  (drawing.accessLevel === 'edit' ||
                     drawing.accessLevel === 'owner');
                 if (canRename) setIsRenaming(true);
               }}
@@ -331,20 +330,20 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
             <div className="relative" onClick={e => e.stopPropagation()}>
               <button
                 onClick={() => {
-                  if (isShared) return;
+                  if (drawing.accessLevel !== 'owner') return;
                   setShowCollectionDropdown(!showCollectionDropdown);
                 }}
                 data-testid={`collection-picker-${drawing.id}`}
                 aria-haspopup="listbox"
                 aria-expanded={showCollectionDropdown}
-                disabled={isShared}
+                disabled={drawing.accessLevel !== 'owner'}
                 className={clsx(
                   'ex-chip max-w-[120px] truncate',
-                  isShared && 'cursor-not-allowed opacity-70'
+                  drawing.accessLevel !== 'owner' && 'cursor-not-allowed opacity-70'
                 )}
               >
                 <span className="truncate">
-                  {isShared
+                  {drawing.accessLevel !== 'owner' || isShared
                     ? 'Shared'
                     : drawing.collectionId
                       ? (collections.find(c => c.id === drawing.collectionId)?.name || 'Collection')
@@ -352,7 +351,7 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
                 </span>
               </button>
 
-              {!isShared && showCollectionDropdown && (
+              {drawing.accessLevel === 'owner' && showCollectionDropdown && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowCollectionDropdown(false)} />
                   <div className="absolute right-0 bottom-8 w-52 z-20 ex-menu max-h-56 overflow-y-auto custom-scrollbar ex-animate-in">
@@ -398,8 +397,7 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
               onClick={(e) => e.stopPropagation()}
             >
               {(!isTrash &&
-                (!isShared ||
-                  drawing.accessLevel === 'edit' ||
+                (drawing.accessLevel === 'edit' ||
                   drawing.accessLevel === 'owner')) ? (
                 <button
                   onClick={() => {
@@ -412,7 +410,7 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
                 </button>
               ) : null}
 
-              {!isShared ? (
+              {drawing.accessLevel === 'owner' ? (
                 <div
                   className="relative"
                   onMouseEnter={() => setShowMoveSubmenu(true)}
@@ -449,7 +447,7 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
                 </div>
               ) : null}
 
-              {!isShared ? (
+              {drawing.accessLevel === 'owner' ? (
                 <>
                   <div className="ex-menu-divider" />
                   <button
@@ -482,7 +480,7 @@ export const DrawingCard: React.FC<DrawingCardProps> = ({
                 </div>
               )}
 
-              {!isShared ? (
+              {drawing.accessLevel === 'owner' ? (
                 <>
                   <div className="ex-menu-divider" />
                   <button

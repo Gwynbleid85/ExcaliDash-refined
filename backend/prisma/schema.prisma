@@ -47,13 +47,15 @@ model SystemConfig {
 }
 
 model Collection {
-  id        String    @id @default(uuid())
-  name      String
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  drawings  Drawing[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id              String    @id @default(uuid())
+  name            String
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  drawings        Drawing[]
+  visibility      String    @default("private") // "private" | "shared"
+  sharePermission String    @default("view")    // "view" | "edit"
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([userId, updatedAt])
 }
