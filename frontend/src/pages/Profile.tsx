@@ -222,160 +222,150 @@ export const Profile: React.FC = () => {
             onEditCollection={handleEditCollection}
             onDeleteCollection={handleDeleteCollection}
         >
-            <h1 className="text-3xl sm:text-5xl mb-6 sm:mb-8 text-slate-900 dark:text-white pl-1" style={{ fontFamily: 'Excalifont' }}>
+            <h1 className="ex-title text-3xl sm:text-5xl mb-6 sm:mb-8 pl-1">
                 Profile
             </h1>
 
             {success && (
-                <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl">
-                    <p className="text-green-800 dark:text-green-200 font-medium">{success}</p>
+                <div className="mb-6 p-3 rounded-ex border border-ex-success bg-ex-success-soft text-sm font-medium text-ex-success">
+                    {success}
                 </div>
             )}
             {error && (
-                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
-                    <p className="text-red-800 dark:text-red-200 font-medium">{error}</p>
+                <div className="mb-6 p-3 rounded-ex border border-ex-danger bg-ex-danger-soft text-sm font-medium text-ex-danger">
+                    {error}
                 </div>
             )}
 
             <div className="space-y-6">
-                <div className="bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] p-6">
+                <div className="ex-island p-6">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 bg-indigo-50 dark:bg-neutral-800 rounded-xl flex items-center justify-center border-2 border-indigo-100 dark:border-neutral-700">
-                            <User size={24} className="text-indigo-600 dark:text-indigo-400" />
+                        <div className="w-11 h-11 bg-ex-primary-soft rounded-ex flex items-center justify-center">
+                            <User size={22} className="text-ex-primary" />
                         </div>
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Personal Information</h2>
+                        <h2 className="ex-title text-2xl">Personal information</h2>
                     </div>
 
-                            {mustResetPassword && (
-                                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-xl">
-                                    <p className="text-amber-900 dark:text-amber-200 font-bold">
-                                        Password reset required
-                                    </p>
-                                    <p className="text-sm text-amber-800 dark:text-amber-200/80 font-medium mt-1">
-                                        Change your password below before using ExcaliDash.
-                                    </p>
+                    {mustResetPassword && (
+                        <div className="p-3 mb-4 rounded-ex border border-ex-warning bg-ex-warning-soft">
+                            <p className="text-ex-text font-semibold">Password reset required</p>
+                            <p className="text-sm text-ex-text-muted mt-1">
+                                Change your password below before using ExcaliDash.
+                            </p>
+                        </div>
+                    )}
+
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="email" className="block text-xs font-semibold text-ex-text-muted mb-1.5">
+                                Email address
+                            </label>
+                            <div className="flex gap-2">
+                                <input
+                                    id="email"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    disabled={!showEmailForm}
+                                    className="ex-input"
+                                />
+                                {!showEmailForm && (
+                                    <button
+                                        onClick={() => {
+                                            setShowEmailForm(true);
+                                            setEmailCurrentPassword('');
+                                            setError('');
+                                            setSuccess('');
+                                        }}
+                                        disabled={mustResetPassword}
+                                        className="ex-btn ex-btn-ghost"
+                                    >
+                                        Change
+                                    </button>
+                                )}
+                            </div>
+
+                            {showEmailForm && (
+                                <div className="mt-3 space-y-3">
+                                    <div>
+                                        <label htmlFor="emailCurrentPassword" className="block text-xs font-semibold text-ex-text-muted mb-1.5">
+                                            Current password
+                                        </label>
+                                        <input
+                                            id="emailCurrentPassword"
+                                            type="password"
+                                            value={emailCurrentPassword}
+                                            onChange={(e) => setEmailCurrentPassword(e.target.value)}
+                                            className="ex-input"
+                                            placeholder="Enter current password"
+                                        />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={handleUpdateEmail}
+                                            disabled={emailLoading || !email.trim() || !emailCurrentPassword || email.trim() === authUser?.email}
+                                            className="ex-btn ex-btn-primary flex-1"
+                                        >
+                                            {emailLoading ? 'Saving…' : 'Save email'}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowEmailForm(false);
+                                                setEmail(authUser?.email || '');
+                                                setEmailCurrentPassword('');
+                                                setError('');
+                                            }}
+                                            disabled={emailLoading}
+                                            className="ex-btn ex-btn-ghost"
+                                        >
+                                            <X size={16} />
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </div>
                             )}
-		                    <div className="space-y-4">
-	                        <div>
-	                            <label htmlFor="email" className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">
-	                                Email Address
-	                            </label>
-	                            <div className="flex gap-3">
-	                                <input
-	                                    id="email"
-	                                    type="email"
-	                                    value={email}
-	                                    onChange={(e) => setEmail(e.target.value)}
-	                                    disabled={!showEmailForm}
-	                                    className={
-	                                        showEmailForm
-	                                            ? "flex-1 px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 font-medium"
-	                                            : "flex-1 px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-2 border-slate-200 dark:border-neutral-700 rounded-xl text-slate-600 dark:text-neutral-400 cursor-not-allowed"
-	                                    }
-	                                />
-		                                {!showEmailForm && (
-		                                    <button
-		                                        onClick={() => {
-		                                            setShowEmailForm(true);
-		                                            setEmailCurrentPassword('');
-		                                            setError('');
-		                                            setSuccess('');
-		                                        }}
-                                                disabled={mustResetPassword}
-		                                        className="px-6 py-3 bg-white dark:bg-neutral-800 text-slate-700 dark:text-neutral-300 font-bold rounded-xl border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 transition-all duration-200"
-		                                    >
-		                                        Change
-		                                    </button>
-		                                )}
-	                            </div>
-
-	                            {showEmailForm && (
-	                                <div className="mt-4 space-y-3">
-	                                    <div>
-	                                        <label htmlFor="emailCurrentPassword" className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">
-	                                            Current Password
-	                                        </label>
-	                                        <input
-	                                            id="emailCurrentPassword"
-	                                            type="password"
-	                                            value={emailCurrentPassword}
-	                                            onChange={(e) => setEmailCurrentPassword(e.target.value)}
-	                                            className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 font-medium"
-	                                            placeholder="Enter current password"
-	                                        />
-	                                    </div>
-	                                    <div className="flex gap-3">
-	                                        <button
-	                                            onClick={handleUpdateEmail}
-	                                            disabled={
-	                                                emailLoading ||
-	                                                !email.trim() ||
-	                                                !emailCurrentPassword ||
-	                                                email.trim() === authUser?.email
-	                                            }
-	                                            className="flex-1 px-6 py-3 bg-indigo-600 dark:bg-indigo-500 text-white font-bold rounded-xl border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-	                                        >
-	                                            {emailLoading ? 'Saving...' : 'Save Email'}
-	                                        </button>
-	                                        <button
-	                                            onClick={() => {
-	                                                setShowEmailForm(false);
-	                                                setEmail(authUser?.email || '');
-	                                                setEmailCurrentPassword('');
-	                                                setError('');
-	                                            }}
-	                                            disabled={emailLoading}
-	                                            className="px-6 py-3 bg-white dark:bg-neutral-800 text-slate-700 dark:text-neutral-300 font-bold rounded-xl border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-	                                        >
-	                                            <X size={18} />
-	                                            Cancel
-	                                        </button>
-	                                    </div>
-	                                </div>
-	                            )}
-	                        </div>
+                        </div>
 
                         <div>
-                            <label htmlFor="name" className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">
-                                Display Name
+                            <label htmlFor="name" className="block text-xs font-semibold text-ex-text-muted mb-1.5">
+                                Display name
                             </label>
-                            <div className="flex gap-3">
+                            <div className="flex gap-2">
                                 <input
                                     id="name"
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="flex-1 px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 font-medium"
+                                    className="ex-input"
                                     placeholder="Your name"
                                 />
-	                                <button
-	                                    onClick={handleUpdateName}
-	                                    disabled={mustResetPassword || loading || !name.trim() || name === authUser?.name}
-	                                    className="px-6 py-3 bg-indigo-600 dark:bg-indigo-500 text-white font-bold rounded-xl border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:disabled:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] flex items-center gap-2"
-	                                >
-	                                    <Save size={18} />
-	                                    Save
-	                                </button>
+                                <button
+                                    onClick={handleUpdateName}
+                                    disabled={mustResetPassword || loading || !name.trim() || name === authUser?.name}
+                                    className="ex-btn ex-btn-primary"
+                                >
+                                    <Save size={16} />
+                                    Save
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] p-6">
+                <div className="ex-island p-6">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-rose-50 dark:bg-neutral-800 rounded-xl flex items-center justify-center border-2 border-rose-100 dark:border-neutral-700">
-                                <Lock size={24} className="text-rose-600 dark:text-rose-400" />
+                            <div className="w-11 h-11 bg-ex-danger-soft rounded-ex flex items-center justify-center">
+                                <Lock size={22} className="text-ex-danger" />
                             </div>
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Change Password</h2>
+                            <h2 className="ex-title text-2xl">Change password</h2>
                         </div>
                         {!showPasswordForm && !mustResetPassword && (
                             <button
                                 onClick={() => setShowPasswordForm(true)}
-                                className="px-4 py-2 bg-rose-600 dark:bg-rose-500 text-white font-bold rounded-xl border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 transition-all duration-200"
+                                className="ex-btn ex-btn-danger-ghost"
                             >
-                                Change Password
+                                Change password
                             </button>
                         )}
                     </div>
@@ -383,22 +373,22 @@ export const Profile: React.FC = () => {
                     {showPasswordForm && (
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="currentPassword" className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">
-                                    Current Password
+                                <label htmlFor="currentPassword" className="block text-xs font-semibold text-ex-text-muted mb-1.5">
+                                    Current password
                                 </label>
                                 <input
                                     id="currentPassword"
                                     type="password"
                                     value={currentPassword}
                                     onChange={(e) => setCurrentPassword(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 dark:focus:ring-rose-400 font-medium"
+                                    className="ex-input"
                                     placeholder="Enter current password"
                                 />
                             </div>
 
                             <div>
-                                <label htmlFor="newPassword" className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">
-                                    New Password
+                                <label htmlFor="newPassword" className="block text-xs font-semibold text-ex-text-muted mb-1.5">
+                                    New password
                                 </label>
                                 <input
                                     id="newPassword"
@@ -408,19 +398,15 @@ export const Profile: React.FC = () => {
                                     minLength={passwordPolicy.minLength}
                                     maxLength={passwordPolicy.maxLength}
                                     pattern={passwordPolicy.patternHtml}
-                                    className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 dark:focus:ring-rose-400 font-medium"
+                                    className="ex-input"
                                     placeholder="Enter new password"
                                 />
-                                <PasswordRequirements
-                                    password={newPassword}
-                                    policy={passwordPolicy}
-                                    className="text-slate-600 dark:text-neutral-400"
-                                />
+                                <PasswordRequirements password={newPassword} policy={passwordPolicy} />
                             </div>
 
                             <div>
-                                <label htmlFor="confirmPassword" className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">
-                                    Confirm New Password
+                                <label htmlFor="confirmPassword" className="block text-xs font-semibold text-ex-text-muted mb-1.5">
+                                    Confirm new password
                                 </label>
                                 <input
                                     id="confirmPassword"
@@ -429,38 +415,38 @@ export const Profile: React.FC = () => {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     minLength={passwordPolicy.minLength}
                                     maxLength={passwordPolicy.maxLength}
-                                    className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 dark:focus:ring-rose-400 font-medium"
+                                    className="ex-input"
                                     placeholder="Confirm new password"
                                 />
                             </div>
 
-                            <div className="flex gap-3 pt-2">
+                            <div className="flex gap-2 pt-2">
                                 <button
                                     onClick={handleChangePassword}
                                     disabled={loading || !currentPassword || !newPassword || !confirmPassword}
-                                    className="flex-1 px-6 py-3 bg-rose-600 dark:bg-rose-500 text-white font-bold rounded-xl border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:disabled:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]"
+                                    className="ex-btn ex-btn-danger flex-1"
                                 >
-                                    {loading ? 'Changing...' : 'Change Password'}
+                                    {loading ? 'Changing…' : 'Change password'}
                                 </button>
-                                    {!mustResetPassword && (
-	                                    <button
-	                                        onClick={() => {
-	                                            setShowPasswordForm(false);
-	                                            setCurrentPassword('');
-	                                            setNewPassword('');
-	                                            setConfirmPassword('');
-	                                            setError('');
-	                                        }}
-	                                        disabled={loading}
-	                                        className="px-6 py-3 bg-white dark:bg-neutral-800 text-slate-700 dark:text-neutral-300 font-bold rounded-xl border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-	                                    >
-	                                        <X size={18} />
-	                                        Cancel
-	                                    </button>
-                                    )}
-	                            </div>
-	                        </div>
-	                    )}
+                                {!mustResetPassword && (
+                                    <button
+                                        onClick={() => {
+                                            setShowPasswordForm(false);
+                                            setCurrentPassword('');
+                                            setNewPassword('');
+                                            setConfirmPassword('');
+                                            setError('');
+                                        }}
+                                        disabled={loading}
+                                        className="ex-btn ex-btn-ghost"
+                                    >
+                                        <X size={16} />
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </Layout>

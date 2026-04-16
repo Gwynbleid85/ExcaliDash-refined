@@ -38,12 +38,12 @@ const getRegistrationButtonClassName = (
   registrationEnabled: boolean | null,
   localRegistrationAllowed: boolean
 ) =>
-  `w-full px-4 py-3 rounded-xl border-2 font-bold transition-all text-sm ${
+  `w-full h-10 px-3 rounded-ex border font-medium transition-colors text-sm ${
     !localRegistrationAllowed
-      ? 'border-slate-200 dark:border-neutral-700 bg-slate-100 dark:bg-neutral-800 text-slate-500 dark:text-neutral-400'
+      ? 'border-ex-border bg-ex-surface-muted text-ex-text-muted'
       : registrationEnabled
-        ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
-        : 'border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-600 dark:text-neutral-300'
+        ? 'border-ex-success bg-ex-success-soft text-ex-success'
+        : 'border-ex-border bg-ex-surface text-ex-text hover:bg-ex-surface-hover'
   }`;
 
 const getOidcLabel = (enabled: boolean | null, loading: boolean) => {
@@ -62,14 +62,14 @@ export const AccessControlCard: React.FC<AccessControlCardProps> = ({
   onToggleRegistration,
   onToggleOidcJitProvisioning,
 }) => (
-  <div className="mb-6 bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] p-4 sm:p-6">
-    <div className="flex items-center gap-3 mb-4">
-      <div className="w-12 h-12 bg-emerald-50 dark:bg-neutral-800 rounded-xl flex items-center justify-center border-2 border-emerald-100 dark:border-neutral-700">
-        <UserPlus size={24} className="text-emerald-700 dark:text-emerald-300" />
+  <div className="mb-6 ex-island p-5 sm:p-6">
+    <div className="flex items-center gap-3 mb-5">
+      <div className="w-11 h-11 bg-ex-success-soft rounded-ex flex items-center justify-center">
+        <UserPlus size={22} className="text-ex-success" />
       </div>
       <div className="min-w-0">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Access Control</h2>
-        <p className="text-sm text-slate-600 dark:text-neutral-400 font-medium">
+        <h2 className="ex-title text-2xl">Access control</h2>
+        <p className="text-sm text-ex-text-muted">
           {getRegistrationSummary(registrationEnabled, localRegistrationAllowed)}
         </p>
       </div>
@@ -77,7 +77,7 @@ export const AccessControlCard: React.FC<AccessControlCardProps> = ({
 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div>
-        <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">
+        <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">
           Local self-sign-up
         </label>
         <button
@@ -94,17 +94,17 @@ export const AccessControlCard: React.FC<AccessControlCardProps> = ({
       </div>
       {oidcEnabled && (
         <div>
-          <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">
+          <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">
             {oidcProviderName || 'OIDC'} auto-provisioning
           </label>
           <button
             type="button"
             onClick={() => void onToggleOidcJitProvisioning()}
             disabled={loading || oidcJitProvisioningEnabled === null}
-            className={`w-full px-4 py-3 rounded-xl border-2 font-bold transition-all text-sm ${
+            className={`w-full h-10 px-3 rounded-ex border font-medium transition-colors text-sm ${
               oidcJitProvisioningEnabled
-                ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200'
-                : 'border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-600 dark:text-neutral-300'
+                ? 'border-ex-primary bg-ex-primary-soft text-ex-primary'
+                : 'border-ex-border bg-ex-surface text-ex-text hover:bg-ex-surface-hover'
             }`}
           >
             {getOidcLabel(oidcJitProvisioningEnabled, loading)}
@@ -114,12 +114,12 @@ export const AccessControlCard: React.FC<AccessControlCardProps> = ({
     </div>
 
     {oidcEnabled && oidcJitProvisioningEnabled !== null && (
-      <div className="mt-4 rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 p-4 text-sm text-blue-900 dark:text-blue-100">
+      <div className="mt-4 rounded-ex border border-ex-primary bg-ex-primary-soft p-3 text-sm text-ex-text">
         <div className="font-semibold">
           {oidcProviderName || 'OIDC'} access:{' '}
           {oidcJitProvisioningEnabled ? 'Auto-provisioning enabled' : 'Invite-only'}
         </div>
-        <div className="mt-1">
+        <div className="mt-1 text-ex-text-muted">
           {oidcJitProvisioningEnabled
             ? 'Any successfully authenticated OIDC user can get an account on first sign-in.'
             : 'Only users pre-created below can sign in through OIDC. Use OIDC-only invites for accounts that should not have a local password.'}

@@ -16,11 +16,11 @@ export const PasswordRequirements: React.FC<Props> = ({ password, policy, classN
       {requirements.map((req) => (
         <li key={req.id} className="flex items-start gap-2">
           {req.ok ? (
-            <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <CheckCircle2 className="mt-0.5 h-4 w-4 text-ex-success" />
           ) : (
-            <Circle className="mt-0.5 h-4 w-4 text-slate-400 dark:text-neutral-500" />
+            <Circle className="mt-0.5 h-4 w-4 text-ex-text-subtle" />
           )}
-          <span className={req.ok ? "text-emerald-700 dark:text-emerald-300" : "text-slate-600 dark:text-neutral-400"}>
+          <span className={req.ok ? 'text-ex-success' : 'text-ex-text-muted'}>
             {req.label}
           </span>
         </li>
@@ -28,4 +28,3 @@ export const PasswordRequirements: React.FC<Props> = ({ password, policy, classN
     </ul>
   );
 };
-

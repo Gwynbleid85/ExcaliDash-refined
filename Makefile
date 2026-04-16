@@ -46,8 +46,8 @@ dev: ## Start backend+frontend in a tmux split screen (single-user local mode)
 		echo "Using existing tmux session: $$SESSION"; \
 	else \
 		echo "Creating tmux session: $$SESSION"; \
-		tmux new-session -d -s $$SESSION -c "$(CURDIR)" "cd backend && PORT=8001 AUTH_MODE=local EXCALIDASH_DEV_SINGLE_USER=true npm run dev"; \
-		tmux split-window -h -t $$SESSION:0 -c "$(CURDIR)" "cd frontend && VITE_DEV_BACKEND_URL=http://localhost:8001 npm run dev"; \
+		tmux new-session -d -s $$SESSION -c "$(CURDIR)" "cd backend && PORT=8061 AUTH_MODE=local EXCALIDASH_DEV_SINGLE_USER=true npm run dev"; \
+		tmux split-window -h -t $$SESSION:0 -c "$(CURDIR)" "cd frontend && VITE_DEV_BACKEND_URL=http://localhost:8061 npm run dev"; \
 		tmux select-layout -t $$SESSION:0 even-horizontal; \
 		tmux select-pane -t $$SESSION:0.0; \
 	fi; \

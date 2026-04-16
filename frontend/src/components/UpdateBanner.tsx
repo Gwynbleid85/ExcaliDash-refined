@@ -140,17 +140,15 @@ export const UpdateBanner: React.FC = () => {
   if (!updateAvailable) return null;
 
   return (
-    <div className="sticky top-0 z-[44] -mt-2 mb-6 rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/80 dark:bg-emerald-950/30 backdrop-blur-md px-3 py-2 shadow-sm transition-all duration-200">
+    <div className="sticky top-0 z-[44] -mt-2 mb-6 rounded-ex border border-ex-border bg-ex-success-soft px-3 py-2 transition-all duration-200">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300 flex-shrink-0">
-            <span className="text-[10px] font-black uppercase tracking-wider">Update available</span>
-          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-ex-success">Update available</span>
           <div className="min-w-0 flex items-center gap-2">
-            <span className="text-sm font-bold text-emerald-950 dark:text-emerald-50 truncate">
+            <span className="text-sm font-semibold text-ex-text truncate">
               v{info?.latestVersion}
             </span>
-            <span className="hidden sm:inline text-xs font-medium text-emerald-900/60 dark:text-emerald-200/40">
+            <span className="hidden sm:inline text-xs text-ex-text-muted">
               ({channel})
             </span>
           </div>
@@ -164,7 +162,7 @@ export const UpdateBanner: React.FC = () => {
               writeChannel(next);
               setChannel(next);
             }}
-            className="h-8 px-2 rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-white/50 dark:bg-neutral-900/50 text-xs font-bold text-emerald-950 dark:text-emerald-50 outline-none hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors"
+            className="h-8 px-2 rounded-ex-sm border border-ex-border bg-ex-surface text-xs font-semibold text-ex-text outline-none hover:border-ex-border-strong transition-colors"
             title="Update channel"
             aria-label="Update channel"
           >
@@ -177,7 +175,7 @@ export const UpdateBanner: React.FC = () => {
               href={info.latestUrl}
               target="_blank"
               rel="noreferrer"
-              className="h-8 inline-flex items-center justify-center gap-1.5 px-3 rounded-lg bg-emerald-600 dark:bg-emerald-600/80 text-[11px] font-black uppercase tracking-wider text-white hover:bg-emerald-700 dark:hover:bg-emerald-500 transition-all shadow-sm shadow-emerald-900/10"
+              className="h-8 inline-flex items-center gap-1.5 px-3 rounded-ex-sm text-[11px] font-bold uppercase tracking-wider bg-ex-success text-white hover:brightness-95 transition-all"
             >
               <ExternalLink size={14} strokeWidth={2.5} />
               <span className="hidden sm:inline">Release</span>
@@ -192,7 +190,7 @@ export const UpdateBanner: React.FC = () => {
               safeSetSessionItem(closedVersionStorageKey(channel), latest);
               setClosedVersion(latest);
             }}
-            className="h-8 inline-flex items-center justify-center gap-1.5 px-3 rounded-lg bg-white/70 dark:bg-neutral-900/60 border border-emerald-200 dark:border-emerald-800/50 text-[11px] font-black uppercase tracking-wider text-emerald-900 dark:text-emerald-100 hover:bg-white dark:hover:bg-neutral-900 transition-colors"
+            className="h-8 inline-flex items-center gap-1.5 px-3 rounded-ex-sm bg-ex-surface border border-ex-border text-[11px] font-bold uppercase tracking-wider text-ex-text hover:bg-ex-surface-hover transition-colors"
             title="Close (will reappear later)"
           >
             <XCircle size={14} strokeWidth={2.5} />
@@ -207,7 +205,7 @@ export const UpdateBanner: React.FC = () => {
               safeSetItem(DISMISSED_VERSION_KEY, latest);
               setIgnoredVersion(latest);
             }}
-            className="h-8 inline-flex items-center justify-center gap-1.5 px-3 rounded-lg bg-emerald-100/70 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800/50 text-[11px] font-black uppercase tracking-wider text-emerald-900 dark:text-emerald-100 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+            className="h-8 inline-flex items-center gap-1.5 px-3 rounded-ex-sm bg-ex-success-soft border border-ex-border text-[11px] font-bold uppercase tracking-wider text-ex-text hover:bg-ex-surface-hover transition-colors"
             title="Ignore this version"
           >
             <BellOff size={14} strokeWidth={2.5} />
@@ -218,11 +216,11 @@ export const UpdateBanner: React.FC = () => {
             type="button"
             onClick={() => void load(true)}
             disabled={loading}
-            className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/70 dark:bg-neutral-900/60 border border-emerald-200 dark:border-emerald-800/50 text-emerald-900 dark:text-emerald-100 hover:bg-white dark:hover:bg-neutral-900 transition-colors disabled:opacity-50"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-ex-sm bg-ex-surface border border-ex-border text-ex-text hover:bg-ex-surface-hover transition-colors disabled:opacity-50"
             title="Re-check now"
             aria-label="Re-check now"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>

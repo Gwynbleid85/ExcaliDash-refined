@@ -129,14 +129,14 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
+    <div className="min-h-screen flex items-center justify-center bg-ex-bg px-4 py-10">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
           <Logo className="mx-auto h-12 w-auto" />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="ex-title mt-5 text-3xl">
             {bootstrapRequired ? 'Set up admin account' : 'Create your account'}
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-ex-text-muted">
             {bootstrapRequired ? (
               <span>
                 Set up your first admin account to finish enabling multi-user access for this
@@ -145,30 +145,27 @@ export const Register: React.FC = () => {
             ) : (
               <>
                 Or{' '}
-                <Link
-                  to="/login"
-                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-                >
+                <Link to="/login" className="font-semibold text-ex-primary hover:text-ex-primary-hover">
                   sign in to your existing account
                 </Link>
               </>
             )}
           </p>
           {bootstrapRequired && (
-            <div className="mt-3 rounded-md bg-amber-50 dark:bg-amber-900/20 p-3 text-xs text-amber-900 dark:text-amber-200 text-left">
-              <div className="font-semibold">One-time setup code</div>
-              <div className="mt-1 text-amber-800 dark:text-amber-200/90">
+            <div className="mt-4 rounded-ex border border-ex-warning bg-ex-warning-soft p-3 text-xs text-ex-text text-left">
+              <div className="font-semibold text-ex-warning uppercase tracking-wider">One-time setup code</div>
+              <div className="mt-1 text-ex-text-muted">
                 Find it in the backend logs (look for <code>[BOOTSTRAP SETUP]</code>):
               </div>
-              <div className="mt-2 rounded bg-amber-100 dark:bg-amber-900/30 p-2">
+              <div className="mt-2 rounded-ex-sm bg-ex-surface border border-ex-border p-2">
                 <div className="flex items-start gap-2">
-                  <pre className="min-w-0 flex-1 whitespace-pre-wrap break-words text-[11px] leading-snug">
+                  <pre className="min-w-0 flex-1 whitespace-pre-wrap break-words text-[11px] leading-snug text-ex-text font-mono">
                     <code className="select-all">{bootstrapLogsCommand}</code>
                   </pre>
                   <button
                     type="button"
                     onClick={() => void copyBootstrapCommand()}
-                    className="shrink-0 inline-flex h-7 w-7 items-center justify-center rounded border border-amber-200/80 dark:border-amber-700/60 bg-amber-50/60 dark:bg-amber-900/35 text-amber-900 dark:text-amber-100 hover:bg-amber-50 dark:hover:bg-amber-900/50"
+                    className="shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-ex-sm border border-ex-border bg-ex-surface text-ex-text hover:bg-ex-surface-hover transition-colors"
                     aria-label={copiedBootstrapCmd ? 'Copied docker command' : 'Copy docker command'}
                     title={copiedBootstrapCmd ? 'Copied' : 'Copy'}
                   >
@@ -176,118 +173,109 @@ export const Register: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="mt-2 text-amber-800 dark:text-amber-200/90">
+              <div className="mt-2 text-ex-text-muted">
                 If you are not using <code>docker-compose.prod.yml</code>, drop the <code>-f ...</code> flag.
               </div>
             </div>
           )}
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <div className="text-sm text-red-800 dark:text-red-200">{error}</div>
-            </div>
-          )}
 
-          {bootstrapRequired && oidcEnabled && !oidcEnforced && (
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={handleOidcBootstrap}
-                disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Set up admin with {oidcProvider || 'OIDC'}
-              </button>
-              <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-                Or create a local admin account below
-              </div>
-            </div>
-          )}
-
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="name" className="sr-only">
-                Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={passwordPolicy.minLength}
-                maxLength={passwordPolicy.maxLength}
-                pattern={passwordPolicy.patternHtml}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <PasswordRequirements password={password} policy={passwordPolicy} className="text-gray-600 dark:text-gray-400" />
-            </div>
-            {bootstrapRequired && (
-              <div>
-                <label htmlFor="setupCode" className="sr-only">
-                  Bootstrap setup code
-                </label>
-                <input
-                  id="setupCode"
-                  name="setupCode"
-                  type="text"
-                  autoComplete="one-time-code"
-                  required
-                  className="appearance-none relative block w-full px-3 py-2 border border-amber-300 dark:border-amber-700 placeholder-amber-600 dark:placeholder-amber-300 text-gray-900 dark:text-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm uppercase tracking-widest"
-                  placeholder="One-time setup code"
-                  value={setupCode}
-                  onChange={(e) => setSetupCode(e.target.value.toUpperCase())}
-                />
+        <div className="ex-island p-6 sm:p-8">
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-ex border border-ex-danger bg-ex-danger-soft p-3 text-sm text-ex-danger font-medium">
+                {error}
               </div>
             )}
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Creating account...' : 'Create account'}
+            {bootstrapRequired && oidcEnabled && !oidcEnforced && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleOidcBootstrap}
+                  disabled={loading}
+                  className="ex-btn ex-btn-ghost w-full h-11"
+                >
+                  Set up admin with {oidcProvider || 'OIDC'}
+                </button>
+                <div className="flex items-center gap-3 py-1">
+                  <div className="flex-1 h-px bg-ex-divider" />
+                  <span className="text-xs text-ex-text-subtle uppercase tracking-wider">or create local admin</span>
+                  <div className="flex-1 h-px bg-ex-divider" />
+                </div>
+              </>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-xs font-semibold text-ex-text-muted mb-1.5">Name</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  className="ex-input"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-xs font-semibold text-ex-text-muted mb-1.5">Email address</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="ex-input"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-xs font-semibold text-ex-text-muted mb-1.5">Password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={passwordPolicy.minLength}
+                  maxLength={passwordPolicy.maxLength}
+                  pattern={passwordPolicy.patternHtml}
+                  className="ex-input"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <PasswordRequirements password={password} policy={passwordPolicy} />
+              </div>
+              {bootstrapRequired && (
+                <div>
+                  <label htmlFor="setupCode" className="block text-xs font-semibold text-ex-warning mb-1.5 uppercase tracking-wider">Bootstrap setup code</label>
+                  <input
+                    id="setupCode"
+                    name="setupCode"
+                    type="text"
+                    autoComplete="one-time-code"
+                    required
+                    className="ex-input uppercase tracking-widest"
+                    placeholder="One-time setup code"
+                    value={setupCode}
+                    onChange={(e) => setSetupCode(e.target.value.toUpperCase())}
+                  />
+                </div>
+              )}
+            </div>
+
+            <button type="submit" disabled={loading} className="ex-btn ex-btn-primary w-full h-11">
+              {loading ? 'Creating account…' : 'Create account'}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

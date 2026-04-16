@@ -12,12 +12,12 @@ export const AuthStatusErrorPanel: React.FC<AuthStatusErrorPanelProps> = ({
   fullScreen = false,
 }) => {
   const panel = (
-    <div className="max-w-lg rounded-md bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-800 dark:text-red-200">
+    <div className="max-w-lg rounded-ex border border-ex-danger bg-ex-danger-soft p-4 text-sm text-ex-text">
       <div>{message}</div>
       <button
         type="button"
         onClick={() => void onRetry()}
-        className="mt-3 rounded-md bg-white/80 px-3 py-2 text-xs font-semibold text-red-900 hover:bg-white dark:bg-red-950/40 dark:text-red-100 dark:hover:bg-red-950/70"
+        className="ex-btn ex-btn-ghost mt-3"
       >
         Retry connection
       </button>
@@ -29,7 +29,7 @@ export const AuthStatusErrorPanel: React.FC<AuthStatusErrorPanelProps> = ({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-ex-bg px-4">
       {panel}
     </div>
   );

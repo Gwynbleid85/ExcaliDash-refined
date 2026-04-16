@@ -515,8 +515,8 @@ export const Admin: React.FC = () => {
 
   if (authEnabled === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-ex-bg">
+        <div className="text-ex-text-muted">Loading…</div>
       </div>
     );
   }
@@ -532,10 +532,8 @@ export const Admin: React.FC = () => {
     >
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 sm:mb-8 min-w-0">
         <div className="min-w-0">
-          <h1 className="text-3xl sm:text-5xl text-slate-900 dark:text-white pl-1" style={{ fontFamily: 'Excalifont' }}>
-            Admin
-          </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400 font-medium">
+          <h1 className="ex-title text-3xl sm:text-5xl pl-1">Admin</h1>
+          <p className="mt-2 text-sm text-ex-text-muted">
             User management and impersonation
           </p>
         </div>
@@ -544,76 +542,76 @@ export const Admin: React.FC = () => {
           <button
             onClick={() => loadUsers()}
             disabled={loadingUsers}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border-2 border-black dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-neutral-200 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 transition-all disabled:opacity-60"
+            className="ex-btn ex-btn-ghost"
           >
             <RefreshCw size={16} />
             Refresh
           </button>
           <button
             onClick={() => setCreateOpen(v => !v)}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border-2 border-black dark:border-neutral-700 bg-indigo-600 text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all"
+            className="ex-btn ex-btn-primary"
           >
             <UserPlus size={16} />
-            New User
+            New user
           </button>
         </div>
       </div>
 
       {success && (
-        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl">
-          <p className="text-green-800 dark:text-green-200 font-medium">{success}</p>
+        <div className="mb-6 p-3 rounded-ex border border-ex-success bg-ex-success-soft text-sm font-medium text-ex-success">
+          {success}
         </div>
       )}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
-          <p className="text-red-800 dark:text-red-200 font-medium">{error}</p>
+        <div className="mb-6 p-3 rounded-ex border border-ex-danger bg-ex-danger-soft text-sm font-medium text-ex-danger">
+          {error}
         </div>
       )}
 
       {createOpen && (
-        <div className="mb-6 bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] p-4 sm:p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-indigo-50 dark:bg-neutral-800 rounded-xl flex items-center justify-center border-2 border-indigo-100 dark:border-neutral-700">
-              <UserCog size={24} className="text-indigo-600 dark:text-indigo-400" />
+        <div className="mb-6 ex-island p-5 sm:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-11 h-11 bg-ex-primary-soft rounded-ex flex items-center justify-center">
+              <UserCog size={22} className="text-ex-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Create User</h2>
+            <h2 className="ex-title text-2xl">Create user</h2>
           </div>
 
           <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">Email</label>
+              <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">Email</label>
               <input
                 type="email"
                 value={createEmail}
                 onChange={e => setCreateEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-slate-200 dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white outline-none"
+                className="ex-input"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">Name</label>
+              <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">Name</label>
               <input
                 type="text"
                 value={createName}
                 onChange={e => setCreateName(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-slate-200 dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white outline-none"
+                className="ex-input"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">Username (optional)</label>
+              <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">Username (optional)</label>
               <input
                 type="text"
                 value={createUsername}
                 onChange={e => setCreateUsername(e.target.value)}
-                className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-slate-200 dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white outline-none"
+                className="ex-input"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">Account Type</label>
+              <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">Account type</label>
               <button
                 type="button"
                 onClick={() => {
@@ -622,15 +620,15 @@ export const Admin: React.FC = () => {
                   if (next) setCreateMustReset(false);
                 }}
                 disabled={!oidcEnabled}
-                className={`w-full px-4 py-3 rounded-xl border-2 font-bold transition-all text-sm ${
+                className={`w-full h-10 px-3 rounded-ex border font-medium text-sm transition-colors ${
                   createOidcOnly
-                    ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200'
-                    : 'border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-600 dark:text-neutral-300'
+                    ? 'border-ex-primary bg-ex-primary-soft text-ex-primary'
+                    : 'border-ex-border bg-ex-surface text-ex-text hover:bg-ex-surface-hover'
                 } ${!oidcEnabled ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 {createOidcOnly ? 'OIDC-only invite' : 'Local password account'}
               </button>
-              <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1.5 text-xs text-ex-text-muted">
                 {createOidcOnly
                   ? 'This user can sign in through OIDC when the IdP email matches. No local password is stored.'
                   : 'This user can sign in with a local password.'}
@@ -639,7 +637,7 @@ export const Admin: React.FC = () => {
 
             {!createOidcOnly && (
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">Temporary Password</label>
+                <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">Temporary password</label>
                 <input
                   type="password"
                   value={createPassword}
@@ -648,53 +646,49 @@ export const Admin: React.FC = () => {
                   maxLength={passwordPolicy.maxLength}
                   pattern={passwordPolicy.patternHtml}
                   required
-                  className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-slate-200 dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white outline-none"
+                  className="ex-input"
                 />
-                <PasswordRequirements
-                  password={createPassword}
-                  policy={passwordPolicy}
-                  className="text-slate-600 dark:text-neutral-400"
-                />
+                <PasswordRequirements password={createPassword} policy={passwordPolicy} />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">Role</label>
+              <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">Role</label>
               <select
                 value={createRole}
                 onChange={e => setCreateRole(e.target.value as 'ADMIN' | 'USER')}
-                className="w-full px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-slate-200 dark:border-neutral-700 rounded-xl text-slate-900 dark:text-white outline-none"
+                className="ex-input"
               >
                 <option value="USER">USER</option>
                 <option value="ADMIN">ADMIN</option>
               </select>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row items-start gap-4 pt-2">
               <div className="flex-1 w-full">
-                <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">Password Reset</label>
+                <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">Password reset</label>
                 <button
                   type="button"
                   onClick={() => !createOidcOnly && setCreateMustReset(!createMustReset)}
                   disabled={createOidcOnly}
-                  className={`w-full px-4 py-3 rounded-xl border-2 font-bold transition-all text-sm ${
+                  className={`w-full h-10 px-3 rounded-ex border font-medium text-sm transition-colors ${
                     createMustReset
-                      ? 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200'
-                      : 'border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-600 dark:text-neutral-300'
+                      ? 'border-ex-warning bg-ex-warning-soft text-ex-warning'
+                      : 'border-ex-border bg-ex-surface text-ex-text hover:bg-ex-surface-hover'
                   } ${createOidcOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                 >
                   {createOidcOnly ? 'Not used for OIDC-only' : createMustReset ? 'Must reset password' : 'No reset required'}
                 </button>
               </div>
               <div className="flex-1 w-full">
-                <label className="block text-sm font-bold text-slate-700 dark:text-neutral-300 mb-2">Account Status</label>
+                <label className="block text-xs font-semibold text-ex-text-muted mb-1.5">Account status</label>
                 <button
                   type="button"
                   onClick={() => setCreateActive(!createActive)}
-                  className={`w-full px-4 py-3 rounded-xl border-2 font-bold transition-all text-sm ${
+                  className={`w-full h-10 px-3 rounded-ex border font-medium text-sm transition-colors ${
                     createActive
-                      ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
-                      : 'border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-600 dark:text-neutral-300'
+                      ? 'border-ex-success bg-ex-success-soft text-ex-success'
+                      : 'border-ex-border bg-ex-surface text-ex-text hover:bg-ex-surface-hover'
                   }`}
                 >
                   {createActive ? 'Active' : 'Inactive'}
@@ -702,18 +696,15 @@ export const Admin: React.FC = () => {
               </div>
             </div>
 
-            <div className="md:col-span-2 flex items-center justify-end gap-3 pt-2">
+            <div className="md:col-span-2 flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setCreateOpen(false)}
-                className="px-4 py-2 text-sm font-bold rounded-xl border-2 border-black dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-neutral-200"
+                className="ex-btn ex-btn-ghost"
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-bold rounded-xl border-2 border-black dark:border-neutral-700 bg-indigo-600 text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all"
-              >
+              <button type="submit" className="ex-btn ex-btn-primary">
                 Create
               </button>
             </div>

@@ -2,8 +2,104 @@
 @tailwind components;
 @tailwind utilities;
 
-html.dark body {
-  background-color: #0a0a0a !important;
+/*
+ * Excalidraw "Islands" design tokens.
+ * Mirrors the look of the real Excalidraw editor: warm lavender page background,
+ * white island panels with subtle 1px border + soft drop shadow, #6965DB accent.
+ */
+:root {
+  --ex-bg: #f1f0ff;
+  --ex-bg-alt: #f7f6ff;
+  --ex-surface: #ffffff;
+  --ex-surface-muted: #fafafb;
+  --ex-surface-hover: #f3f3fb;
+
+  --ex-border: rgba(0, 0, 0, 0.08);
+  --ex-border-strong: rgba(0, 0, 0, 0.14);
+  --ex-divider: rgba(0, 0, 0, 0.06);
+
+  --ex-text: #1b1b1f;
+  --ex-text-muted: #6a6a76;
+  --ex-text-subtle: #9a9aa6;
+
+  --ex-primary: #6965db;
+  --ex-primary-hover: #5b57d1;
+  --ex-primary-active: #4e4ab8;
+  --ex-primary-soft: #eeedff;
+  --ex-primary-soft-hover: #e1dfff;
+  --ex-primary-contrast: #ffffff;
+
+  --ex-danger: #e03131;
+  --ex-danger-hover: #c92a2a;
+  --ex-danger-soft: #fff0f0;
+
+  --ex-success: #2f9e44;
+  --ex-success-soft: #eafaee;
+
+  --ex-warning: #e8590c;
+  --ex-warning-soft: #fff4ec;
+
+  --ex-shadow-island:
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 6px 16px rgba(0, 0, 0, 0.06);
+  --ex-shadow-raised:
+    0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 16px 32px rgba(0, 0, 0, 0.08);
+  --ex-shadow-soft:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+
+  --ex-radius-sm: 6px;
+  --ex-radius: 8px;
+  --ex-radius-lg: 12px;
+  --ex-radius-xl: 16px;
+}
+
+html.dark {
+  --ex-bg: #0f0f12;
+  --ex-bg-alt: #18181c;
+  --ex-surface: #232329;
+  --ex-surface-muted: #1c1c21;
+  --ex-surface-hover: #2c2c33;
+
+  --ex-border: rgba(255, 255, 255, 0.08);
+  --ex-border-strong: rgba(255, 255, 255, 0.14);
+  --ex-divider: rgba(255, 255, 255, 0.06);
+
+  --ex-text: #ececf4;
+  --ex-text-muted: #9b9ba8;
+  --ex-text-subtle: #6b6b78;
+
+  --ex-primary: #a8a5ff;
+  --ex-primary-hover: #bebcff;
+  --ex-primary-active: #8d89f0;
+  --ex-primary-soft: rgba(168, 165, 255, 0.12);
+  --ex-primary-soft-hover: rgba(168, 165, 255, 0.2);
+  --ex-primary-contrast: #1b1b1f;
+
+  --ex-danger: #ff6b6b;
+  --ex-danger-hover: #fa5252;
+  --ex-danger-soft: rgba(255, 107, 107, 0.12);
+
+  --ex-success: #51cf66;
+  --ex-success-soft: rgba(81, 207, 102, 0.12);
+
+  --ex-warning: #ff922b;
+  --ex-warning-soft: rgba(255, 146, 43, 0.12);
+
+  --ex-shadow-island:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 6px 16px rgba(0, 0, 0, 0.5);
+  --ex-shadow-raised:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.55),
+    0 16px 32px rgba(0, 0, 0, 0.55);
+  --ex-shadow-soft:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 html,
@@ -14,19 +110,18 @@ body {
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 dark:bg-neutral-950 dark:text-neutral-50;
-  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-html.dark body {
-  background-image: radial-gradient(#262626 1px, transparent 1px);
+  background-color: var(--ex-bg);
+  color: var(--ex-text);
+  font-family:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .no-scrollbar {
-  /* Hide scrollbars but keep scrolling (Chrome/Safari/Firefox). */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge Legacy */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -34,9 +129,416 @@ html.dark body {
   height: 0;
 }
 
+/* Slim scrollbar used inside panels and menus */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--ex-border-strong);
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--ex-text-subtle);
+}
+
 @font-face {
-  font-family: 'Excalifont';
-  src: url('./assets/fonts/Excalifont-Regular.woff2') format('woff2');
+  font-family: "Excalifont";
+  src: url("./assets/fonts/Excalifont-Regular.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
+}
+
+/* ----- Excalidraw Islands component layer ----- */
+@layer components {
+  /* A floating "island" — rounded white panel with a 1px hairline + soft shadow.
+     This is the core Excalidraw editor chrome pattern. */
+  .ex-island {
+    background-color: var(--ex-surface);
+    border: 1px solid var(--ex-border);
+    border-radius: var(--ex-radius-lg);
+    box-shadow: var(--ex-shadow-island);
+    color: var(--ex-text);
+  }
+
+  /* Lightweight panel: same surface but no shadow, used when nested. */
+  .ex-panel {
+    background-color: var(--ex-surface);
+    border: 1px solid var(--ex-border);
+    border-radius: var(--ex-radius);
+    color: var(--ex-text);
+  }
+
+  .ex-card {
+    background-color: var(--ex-surface);
+    border: 1px solid var(--ex-border);
+    border-radius: var(--ex-radius-lg);
+    box-shadow: var(--ex-shadow-island);
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      border-color 180ms ease;
+  }
+
+  .ex-card-interactive:hover {
+    border-color: var(--ex-border-strong);
+    box-shadow: var(--ex-shadow-raised);
+    transform: translateY(-2px);
+  }
+
+  .ex-card-selected {
+    border-color: var(--ex-primary);
+    box-shadow:
+      0 0 0 2px var(--ex-primary-soft),
+      var(--ex-shadow-raised);
+  }
+
+  /* Base button surface. Compose with variant below. */
+  .ex-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.375rem; /* 38px, Excalidraw-ish */
+    padding: 0 0.875rem;
+    border-radius: var(--ex-radius);
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      color 140ms ease,
+      box-shadow 140ms ease,
+      transform 140ms ease;
+    user-select: none;
+  }
+
+  .ex-btn:disabled,
+  .ex-btn[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .ex-btn-primary {
+    background-color: var(--ex-primary);
+    color: var(--ex-primary-contrast);
+    border-color: var(--ex-primary);
+    box-shadow: var(--ex-shadow-soft);
+  }
+
+  .ex-btn-primary:hover:not(:disabled) {
+    background-color: var(--ex-primary-hover);
+    border-color: var(--ex-primary-hover);
+  }
+
+  .ex-btn-primary:active:not(:disabled) {
+    background-color: var(--ex-primary-active);
+    border-color: var(--ex-primary-active);
+    transform: translateY(1px);
+  }
+
+  .ex-btn-ghost {
+    background-color: var(--ex-surface);
+    color: var(--ex-text);
+    border-color: var(--ex-border);
+  }
+
+  .ex-btn-ghost:hover:not(:disabled) {
+    background-color: var(--ex-surface-hover);
+    border-color: var(--ex-border-strong);
+  }
+
+  .ex-btn-soft {
+    background-color: var(--ex-primary-soft);
+    color: var(--ex-primary);
+    border-color: transparent;
+  }
+
+  .ex-btn-soft:hover:not(:disabled) {
+    background-color: var(--ex-primary-soft-hover);
+  }
+
+  .ex-btn-danger {
+    background-color: var(--ex-danger);
+    color: #ffffff;
+    border-color: var(--ex-danger);
+    box-shadow: var(--ex-shadow-soft);
+  }
+
+  .ex-btn-danger:hover:not(:disabled) {
+    background-color: var(--ex-danger-hover);
+    border-color: var(--ex-danger-hover);
+  }
+
+  .ex-btn-danger-ghost {
+    background-color: var(--ex-surface);
+    color: var(--ex-danger);
+    border-color: var(--ex-border);
+  }
+
+  .ex-btn-danger-ghost:hover:not(:disabled) {
+    background-color: var(--ex-danger-soft);
+    border-color: var(--ex-danger);
+  }
+
+  /* Icon-only button: square, same height. */
+  .ex-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.375rem;
+    height: 2.375rem;
+    border-radius: var(--ex-radius);
+    border: 1px solid var(--ex-border);
+    background-color: var(--ex-surface);
+    color: var(--ex-text);
+    cursor: pointer;
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      color 140ms ease;
+  }
+
+  .ex-btn-icon:hover:not(:disabled) {
+    background-color: var(--ex-surface-hover);
+    border-color: var(--ex-border-strong);
+    color: var(--ex-primary);
+  }
+
+  .ex-btn-icon:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .ex-btn-icon[data-variant="danger"]:hover:not(:disabled) {
+    background-color: var(--ex-danger-soft);
+    border-color: var(--ex-danger);
+    color: var(--ex-danger);
+  }
+
+  .ex-btn-icon[data-variant="success"]:hover:not(:disabled) {
+    background-color: var(--ex-success-soft);
+    border-color: var(--ex-success);
+    color: var(--ex-success);
+  }
+
+  /* Input field */
+  .ex-input {
+    width: 100%;
+    height: 2.375rem;
+    padding: 0 0.75rem;
+    background-color: var(--ex-surface);
+    color: var(--ex-text);
+    border: 1px solid var(--ex-border);
+    border-radius: var(--ex-radius);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition:
+      border-color 140ms ease,
+      box-shadow 140ms ease;
+  }
+
+  .ex-input::placeholder {
+    color: var(--ex-text-subtle);
+  }
+
+  .ex-input:focus {
+    outline: none;
+    border-color: var(--ex-primary);
+    box-shadow: 0 0 0 3px var(--ex-primary-soft);
+  }
+
+  .ex-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Multi-line input — same chrome, auto height */
+  .ex-textarea {
+    @apply ex-input;
+    height: auto;
+    padding: 0.625rem 0.75rem;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  /* Chip / pill (e.g. drawing-card collection label) */
+  .ex-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--ex-border);
+    background-color: var(--ex-surface-muted);
+    color: var(--ex-text-muted);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 1.25rem;
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      color 140ms ease;
+  }
+
+  .ex-chip:hover:not(:disabled) {
+    background-color: var(--ex-primary-soft);
+    border-color: var(--ex-primary);
+    color: var(--ex-primary);
+  }
+
+  /* Dropdown / context menu */
+  .ex-menu {
+    background-color: var(--ex-surface);
+    border: 1px solid var(--ex-border);
+    border-radius: var(--ex-radius);
+    box-shadow: var(--ex-shadow-raised);
+    padding: 0.25rem;
+    color: var(--ex-text);
+  }
+
+  .ex-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--ex-radius-sm);
+    font-size: 0.8125rem;
+    color: var(--ex-text);
+    background: transparent;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      color 120ms ease;
+  }
+
+  .ex-menu-item:hover:not(:disabled) {
+    background-color: var(--ex-primary-soft);
+    color: var(--ex-primary);
+  }
+
+  .ex-menu-item[data-variant="danger"]:hover:not(:disabled) {
+    background-color: var(--ex-danger-soft);
+    color: var(--ex-danger);
+  }
+
+  .ex-menu-item[data-active="true"] {
+    background-color: var(--ex-primary-soft);
+    color: var(--ex-primary);
+    font-weight: 600;
+  }
+
+  .ex-menu-divider {
+    height: 1px;
+    background-color: var(--ex-divider);
+    margin: 0.25rem 0;
+  }
+
+  .ex-menu-label {
+    padding: 0.5rem 0.625rem 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ex-text-subtle);
+  }
+
+  /* Sidebar nav item */
+  .ex-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--ex-radius);
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ex-text-muted);
+    background: transparent;
+    cursor: pointer;
+    transition:
+      background-color 140ms ease,
+      color 140ms ease,
+      border-color 140ms ease;
+  }
+
+  .ex-nav-item:hover:not(:disabled) {
+    background-color: var(--ex-surface-hover);
+    color: var(--ex-text);
+  }
+
+  .ex-nav-item[data-active="true"] {
+    background-color: var(--ex-primary-soft);
+    color: var(--ex-primary);
+    border-color: transparent;
+  }
+
+  .ex-nav-item[data-active="true"] svg {
+    color: var(--ex-primary);
+  }
+
+  /* Section label used under sidebar groupings */
+  .ex-section-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ex-text-subtle);
+  }
+
+  /* Subtle divider line */
+  .ex-divider {
+    height: 1px;
+    background-color: var(--ex-divider);
+  }
+}
+
+/* Standard page and card headings should use the Excalidraw UI stack. */
+.ex-title {
+  font-family:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  color: var(--ex-text);
+  letter-spacing: -0.01em;
+}
+
+/* Brand wordmark can keep the handwritten Excalidraw-style font. */
+.ex-brand {
+  font-family: "Excalifont", "Assistant", system-ui, sans-serif;
+  color: var(--ex-text);
+  letter-spacing: -0.01em;
+}
+
+/* Animations — subtle, Excalidraw-like */
+@keyframes ex-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ex-animate-in {
+  animation: ex-fade-in 140ms ease-out;
 }

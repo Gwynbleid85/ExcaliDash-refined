@@ -192,25 +192,25 @@ export const ImpersonationBanner: React.FC = () => {
   }
 
   return (
-    <div className="sticky top-0 z-[45] -mt-2 mb-6 rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50/80 dark:bg-red-950/30 backdrop-blur-md px-3 py-2 shadow-sm transition-all duration-200">
+    <div className="sticky top-0 z-[45] -mt-2 mb-6 rounded-ex border border-ex-border bg-ex-danger-soft px-3 py-2 transition-all duration-200">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 text-red-700 dark:text-red-400 flex-shrink-0">
+          <div className="flex items-center gap-1.5 text-ex-danger flex-shrink-0">
             <LogIn size={14} strokeWidth={2.5} />
-            <span className="text-[10px] font-black uppercase tracking-wider">Impersonating</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Impersonating</span>
           </div>
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-sm font-bold text-red-900 dark:text-red-100 truncate">
+            <span className="text-sm font-semibold text-ex-text truncate">
               {impersonation.target.name}
             </span>
-            <span className="hidden sm:inline text-xs font-medium text-red-800/60 dark:text-red-200/40 truncate">
+            <span className="hidden sm:inline text-xs text-ex-text-muted truncate">
               {impersonation.target.email}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          <div className="hidden lg:flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-red-700/60 dark:text-red-400/40">
+          <div className="hidden lg:inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-ex-text-subtle">
             Switch:
           </div>
           <select
@@ -219,7 +219,7 @@ export const ImpersonationBanner: React.FC = () => {
               void switchTarget(e.target.value);
             }}
             disabled={busy || loadingTargets || options.length === 0}
-            className="h-8 min-w-[140px] max-w-[200px] px-2 rounded-lg border border-red-200 dark:border-red-800/50 bg-white/50 dark:bg-neutral-900/50 text-xs font-bold text-red-900 dark:text-red-100 outline-none hover:border-red-300 dark:hover:border-red-700 transition-colors disabled:opacity-50"
+            className="h-8 min-w-[140px] max-w-[200px] px-2 rounded-ex-sm border border-ex-border bg-ex-surface text-xs font-semibold text-ex-text outline-none hover:border-ex-border-strong transition-colors disabled:opacity-50"
           >
             {options.map((target) => (
               <option key={target.id} value={target.id}>
@@ -231,7 +231,7 @@ export const ImpersonationBanner: React.FC = () => {
             type="button"
             onClick={stop}
             disabled={busy}
-            className="h-8 flex items-center justify-center gap-1.5 px-3 rounded-lg bg-red-600 dark:bg-red-600/80 text-[11px] font-black uppercase tracking-wider text-white hover:bg-red-700 dark:hover:bg-red-500 transition-all disabled:opacity-50 shadow-sm shadow-red-900/10"
+            className="h-8 inline-flex items-center gap-1.5 px-3 rounded-ex-sm bg-ex-danger text-white text-[11px] font-bold uppercase tracking-wider hover:brightness-95 transition-all disabled:opacity-50"
           >
             <XCircle size={14} strokeWidth={2.5} />
             <span className="hidden sm:inline">Stop</span>
@@ -240,19 +240,19 @@ export const ImpersonationBanner: React.FC = () => {
       </div>
 
       {(loadingTargets || error) && (
-        <div className="mt-1.5 pt-1.5 border-t border-red-200/50 dark:border-red-800/20 flex items-center gap-3 text-[10px] font-bold text-red-800 dark:text-red-300">
+        <div className="mt-1.5 pt-1.5 border-t border-ex-divider flex items-center gap-3 text-[10px] font-semibold text-ex-text-muted">
           {loadingTargets ? (
             <span className="inline-flex items-center gap-1.5">
               <RefreshCw size={10} className="animate-spin" />
-              Syncing targets...
+              Syncing targets…
             </span>
           ) : null}
-          {error ? <span className="truncate">{error}</span> : null}
+          {error ? <span className="truncate text-ex-danger">{error}</span> : null}
           {error ? (
             <button
               type="button"
               onClick={() => void loadTargets()}
-              className="px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-700/50 hover:bg-red-200 transition-colors"
+              className="px-1.5 py-0.5 rounded-ex-sm bg-ex-surface border border-ex-border hover:bg-ex-surface-hover transition-colors"
             >
               Retry
             </button>

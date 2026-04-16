@@ -74,24 +74,17 @@ export const PasswordResetConfirm: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <Logo className="mx-auto h-12 w-auto" />
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-              Password reset successful
-            </h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Your password has been reset. Redirecting to login...
-            </p>
-            <div className="mt-6">
-              <Link
-                to="/login"
-                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-              >
-                Go to login
-              </Link>
-            </div>
+      <div className="min-h-screen flex items-center justify-center bg-ex-bg px-4 py-10">
+        <div className="max-w-md w-full text-center">
+          <Logo className="mx-auto h-12 w-auto" />
+          <h2 className="ex-title mt-5 text-3xl">Password reset successful</h2>
+          <p className="mt-2 text-sm text-ex-text-muted">
+            Your password has been reset. Redirecting to login…
+          </p>
+          <div className="mt-6">
+            <Link to="/login" className="text-sm font-semibold text-ex-primary hover:text-ex-primary-hover">
+              Go to login
+            </Link>
           </div>
         </div>
       </div>
@@ -99,83 +92,69 @@ export const PasswordResetConfirm: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
+    <div className="min-h-screen flex items-center justify-center bg-ex-bg px-4 py-10">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
           <Logo className="mx-auto h-12 w-auto" />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-            Set new password
-          </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Enter your new password below.
-          </p>
+          <h2 className="ex-title mt-5 text-3xl">Set new password</h2>
+          <p className="mt-2 text-sm text-ex-text-muted">Enter your new password below.</p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <div className="text-sm text-red-800 dark:text-red-200">{error}</div>
-            </div>
-          )}
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="password" className="sr-only">
-                New password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={passwordPolicy.minLength}
-                maxLength={passwordPolicy.maxLength}
-                pattern={passwordPolicy.patternHtml}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-800 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="New password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <PasswordRequirements password={password} policy={passwordPolicy} className="text-gray-600 dark:text-gray-400" />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">
-                Confirm password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={passwordPolicy.minLength}
-                maxLength={passwordPolicy.maxLength}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-800 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading || !token}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Resetting...' : 'Reset password'}
+        <div className="ex-island p-6 sm:p-8">
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-ex border border-ex-danger bg-ex-danger-soft p-3 text-sm text-ex-danger font-medium">
+                {error}
+              </div>
+            )}
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="password" className="block text-xs font-semibold text-ex-text-muted mb-1.5">New password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={passwordPolicy.minLength}
+                  maxLength={passwordPolicy.maxLength}
+                  pattern={passwordPolicy.patternHtml}
+                  className="ex-input"
+                  placeholder="New password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <PasswordRequirements password={password} policy={passwordPolicy} />
+              </div>
+              <div>
+                <label htmlFor="confirmPassword" className="block text-xs font-semibold text-ex-text-muted mb-1.5">Confirm password</label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={passwordPolicy.minLength}
+                  maxLength={passwordPolicy.maxLength}
+                  className="ex-input"
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <button type="submit" disabled={loading || !token} className="ex-btn ex-btn-primary w-full h-11">
+              {loading ? 'Resetting…' : 'Reset password'}
             </button>
-          </div>
 
-          <div className="text-center">
-            <Link
-              to="/login"
-              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-            >
-              Back to login
-            </Link>
-          </div>
-        </form>
+            <div className="text-center">
+              <Link to="/login" className="text-sm font-semibold text-ex-primary hover:text-ex-primary-hover">
+                Back to login
+              </Link>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

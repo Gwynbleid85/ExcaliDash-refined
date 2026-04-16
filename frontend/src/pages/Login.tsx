@@ -149,200 +149,182 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
+    <div className="min-h-screen flex items-center justify-center bg-ex-bg px-4 py-10">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
           <Logo className="mx-auto h-12 w-auto" />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="ex-title mt-5 text-3xl">
             {mustReset
               ? 'Reset your password'
               : oidcEnforced
                 ? `Sign in with ${oidcProvider || 'OIDC'}`
-                : 'Sign in to your account'}
+                : 'Welcome back'}
           </h2>
           {!mustReset && !oidcEnforced && registrationEnabled ? (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-sm text-ex-text-muted">
               Or{' '}
-              <Link
-                to="/register"
-                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-              >
+              <Link to="/register" className="font-semibold text-ex-primary hover:text-ex-primary-hover">
                 create a new account
               </Link>
             </p>
           ) : !mustReset && !oidcEnforced ? (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Sign in with an existing account.
-            </p>
+            <p className="mt-2 text-sm text-ex-text-muted">Sign in with an existing account.</p>
           ) : mustReset ? (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-sm text-ex-text-muted">
               Your admin requires you to set a new password before using ExcaliDash.
             </p>
           ) : (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-sm text-ex-text-muted">
               You will be redirected to {oidcProvider || 'your identity provider'}.
             </p>
           )}
         </div>
-        <form className="mt-8 space-y-6" onSubmit={mustReset ? handleMustReset : handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <div className="text-sm text-red-800 dark:text-red-200">{error}</div>
-            </div>
-          )}
-          {oidcEnforced && !mustReset ? (
-            <div>
+
+        <div className="ex-island p-6 sm:p-8">
+          <form className="space-y-5" onSubmit={mustReset ? handleMustReset : handleSubmit}>
+            {error && (
+              <div className="rounded-ex border border-ex-danger bg-ex-danger-soft p-3 text-sm text-ex-danger font-medium">
+                {error}
+              </div>
+            )}
+
+            {oidcEnforced && !mustReset ? (
               <button
                 type="button"
                 onClick={() => api.startOidcSignIn(oidcReturnTo)}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="ex-btn ex-btn-primary w-full h-11"
               >
                 Continue with {oidcProvider || 'OIDC'}
               </button>
-            </div>
-          ) : (
-            <>
-              <div className="rounded-md shadow-sm -space-y-px">
-                {!mustReset ? (
-                <>
-                  <div>
-                    <label htmlFor="email" className="sr-only">
-                      Email address
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                      placeholder="Email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="password" className="sr-only">
-                      Password
-                    </label>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      autoComplete="current-password"
-                      required
-                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                </>
-                ) : (
-                <>
-                  <div>
-                    <label htmlFor="newPassword" className="sr-only">
-                      New password
-                    </label>
-                    <input
-                      id="newPassword"
-                      name="newPassword"
-                      type="password"
-                      autoComplete="new-password"
-                      required
-                      minLength={passwordPolicy.minLength}
-                      maxLength={passwordPolicy.maxLength}
-                      pattern={passwordPolicy.patternHtml}
-                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                      placeholder="New password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="confirmNewPassword" className="sr-only">
-                      Confirm new password
-                    </label>
-                    <input
-                      id="confirmNewPassword"
-                      name="confirmNewPassword"
-                      type="password"
-                      autoComplete="new-password"
-                      required
-                      minLength={passwordPolicy.minLength}
-                      maxLength={passwordPolicy.maxLength}
-                      className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                      placeholder="Confirm new password"
-                      value={confirmNewPassword}
-                      onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    />
-                  </div>
-                </>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {!mustReset ? (
+                    <>
+                      <div>
+                        <label htmlFor="email" className="block text-xs font-semibold text-ex-text-muted mb-1.5">Email address</label>
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          required
+                          className="ex-input"
+                          placeholder="you@example.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="password" className="block text-xs font-semibold text-ex-text-muted mb-1.5">Password</label>
+                        <input
+                          id="password"
+                          name="password"
+                          type="password"
+                          autoComplete="current-password"
+                          required
+                          className="ex-input"
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <label htmlFor="newPassword" className="block text-xs font-semibold text-ex-text-muted mb-1.5">New password</label>
+                        <input
+                          id="newPassword"
+                          name="newPassword"
+                          type="password"
+                          autoComplete="new-password"
+                          required
+                          minLength={passwordPolicy.minLength}
+                          maxLength={passwordPolicy.maxLength}
+                          pattern={passwordPolicy.patternHtml}
+                          className="ex-input"
+                          placeholder="New password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="confirmNewPassword" className="block text-xs font-semibold text-ex-text-muted mb-1.5">Confirm new password</label>
+                        <input
+                          id="confirmNewPassword"
+                          name="confirmNewPassword"
+                          type="password"
+                          autoComplete="new-password"
+                          required
+                          minLength={passwordPolicy.minLength}
+                          maxLength={passwordPolicy.maxLength}
+                          className="ex-input"
+                          placeholder="Confirm new password"
+                          value={confirmNewPassword}
+                          onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {mustReset && (
+                  <PasswordRequirements password={newPassword} policy={passwordPolicy} />
                 )}
+              </>
+            )}
+
+            {!mustReset && !oidcEnforced && (
+              <div className="flex justify-end">
+                <Link to="/reset-password" className="text-sm font-semibold text-ex-primary hover:text-ex-primary-hover">
+                  Forgot your password?
+                </Link>
               </div>
-              {mustReset && (
-                <PasswordRequirements
-                  password={newPassword}
-                  policy={passwordPolicy}
-                  className="text-gray-600 dark:text-gray-400"
-                />
-              )}
-            </>
-          )}
+            )}
 
-          {!mustReset && !oidcEnforced && (
-            <div className="flex justify-end">
-              <Link
-                to="/reset-password"
-                className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-          )}
-
-          {(!oidcEnforced || mustReset) && (
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+            {(!oidcEnforced || mustReset) && (
+              <button type="submit" disabled={loading} className="ex-btn ex-btn-primary w-full h-11">
                 {mustReset
-                  ? (loading ? 'Updating...' : 'Set new password')
-                  : (loading ? 'Signing in...' : 'Sign in')}
+                  ? (loading ? 'Updating…' : 'Set new password')
+                  : (loading ? 'Signing in…' : 'Sign in')}
               </button>
-            </div>
-          )}
+            )}
 
-          {!mustReset && oidcEnabled && !oidcEnforced && (
-            <div>
-              <button
-                type="button"
-                onClick={() => api.startOidcSignIn('/')}
-                className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Continue with {oidcProvider || 'OIDC'}
-              </button>
-            </div>
-          )}
+            {!mustReset && oidcEnabled && !oidcEnforced && (
+              <>
+                <div className="flex items-center gap-3 py-1">
+                  <div className="flex-1 h-px bg-ex-divider" />
+                  <span className="text-xs text-ex-text-subtle uppercase tracking-wider">or</span>
+                  <div className="flex-1 h-px bg-ex-divider" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => api.startOidcSignIn('/')}
+                  className="ex-btn ex-btn-ghost w-full h-11"
+                >
+                  Continue with {oidcProvider || 'OIDC'}
+                </button>
+              </>
+            )}
 
-          {mustReset && (
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setNewPassword('');
-                  setConfirmNewPassword('');
-                  logout();
-                }}
-                className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-              >
-                Sign in as a different user
-              </button>
-            </div>
-          )}
-        </form>
+            {mustReset && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewPassword('');
+                    setConfirmNewPassword('');
+                    logout();
+                  }}
+                  className="text-sm font-semibold text-ex-primary hover:text-ex-primary-hover"
+                >
+                  Sign in as a different user
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );

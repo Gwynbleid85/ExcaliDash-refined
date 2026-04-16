@@ -641,7 +641,7 @@ export const Dashboard: React.FC = () => {
             {dragPreviewDrawings.slice(0, 3).map((d, i) => (
               <div
                 key={d.id}
-                className="absolute inset-0 bg-slate-50 border-2 border-black rounded-xl shadow-sm flex items-center justify-center overflow-hidden"
+                className="absolute inset-0 ex-card flex items-center justify-center overflow-hidden"
                 style={{
                   transform: `translate(${i * 4}px, ${i * 4}px)`,
                   zIndex: 3 - i,
@@ -649,20 +649,18 @@ export const Dashboard: React.FC = () => {
                   height: '100%'
                 }}
               >
-                <div className="absolute inset-0 opacity-[0.3] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] [background-size:24px_24px]"></div>
-
                 {d.preview ? (
                   <div
-                    className="w-full h-full p-2 flex items-center justify-center [&>svg]:w-auto [&>svg]:h-auto [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:drop-shadow-sm relative z-10"
+                    className="w-full h-full p-2 flex items-center justify-center [&>svg]:w-auto [&>svg]:h-auto [&>svg]:max-w-full [&>svg]:max-h-full relative z-10"
                     dangerouslySetInnerHTML={{ __html: d.preview }}
                   />
                 ) : (
-                  <div className="text-slate-300 relative z-10"><Folder size={24} /></div>
+                  <div className="text-ex-text-subtle relative z-10"><Folder size={24} /></div>
                 )}
               </div>
             ))}
             {dragPreviewDrawings.length > 1 && (
-              <div className="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-50">
+              <div className="absolute -top-2 -right-2 bg-ex-primary text-ex-primary-contrast text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-ex-soft z-50">
                 {dragPreviewDrawings.length}
               </div>
             )}
@@ -673,7 +671,7 @@ export const Dashboard: React.FC = () => {
     {isDragSelecting && selectionBounds && (
         <DragOverlayPortal>
           <div
-            className="fixed z-50 pointer-events-none border-2 border-black dark:border-neutral-500 bg-neutral-500/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]"
+            className="fixed z-50 pointer-events-none rounded-ex border border-ex-primary bg-ex-primary-soft"
             style={{
               left: selectionBounds.left,
               top: selectionBounds.top,
@@ -684,49 +682,46 @@ export const Dashboard: React.FC = () => {
         </DragOverlayPortal>
       )}
 
-      <h1 className="text-3xl sm:text-5xl mb-6 sm:mb-8 text-slate-900 dark:text-white pl-1" style={{ fontFamily: 'Excalifont' }}>
+      <h1 className="ex-title text-3xl sm:text-5xl mb-6 sm:mb-8 pl-1">
         {viewTitle}
       </h1>
 
       <div className="mb-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div className="flex flex-1 w-full lg:w-auto gap-3 items-center flex-wrap">
-          <div className="relative flex-1 group max-w-md transition-all duration-200 focus-within:-translate-y-0.5">
+          <div className="relative flex-1 group max-w-md">
             <input
               ref={searchInputRef}
               type="text"
               placeholder="Search drawings..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-12 py-2.5 bg-white dark:bg-neutral-900 border-2 border-black dark:border-neutral-700 rounded-xl focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:focus:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] outline-none transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] placeholder:text-slate-400 dark:placeholder:text-neutral-500 text-sm text-slate-900 dark:text-white"
+              className="ex-input pl-10 pr-12"
             />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-neutral-500 group-focus-within:text-indigo-500 dark:group-focus-within:text-neutral-300 transition-colors pointer-events-none" size={18} />
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 -mt-px pointer-events-none">
-              <kbd className="hidden sm:inline-flex items-center h-5 px-1.5 text-[10px] font-bold text-slate-400 dark:text-neutral-600 bg-slate-100 dark:bg-neutral-800 border border-slate-300 dark:border-neutral-700 rounded shadow-[0px_2px_0px_0px_rgba(0,0,0,0.05)]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ex-text-subtle group-focus-within:text-ex-primary transition-colors pointer-events-none" size={18} />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <kbd className="hidden sm:inline-flex items-center h-5 px-1.5 text-[10px] font-semibold text-ex-text-subtle bg-ex-surface-muted border border-ex-border rounded">
                 <span className="text-xs mr-0.5">⌘</span>K
               </kbd>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-1 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="relative">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowSortMenu(!showSortMenu);
                 }}
-                className={clsx(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition-all border-2 border-black dark:border-neutral-700 whitespace-nowrap h-[42px] w-full sm:w-[180px]",
-                  "bg-white dark:bg-neutral-900 text-slate-700 dark:text-neutral-300 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
-                )}
+                className="ex-btn ex-btn-ghost w-full sm:w-[180px]"
               >
-                <span className="text-indigo-600 dark:text-indigo-400 flex-shrink-0">{currentSortOption.icon}</span>
+                <span className="text-ex-primary flex-shrink-0">{currentSortOption.icon}</span>
                 <span className="whitespace-nowrap flex-1 text-left">{currentSortOption.label}</span>
-                <ChevronDown size={16} className="text-slate-400 dark:text-neutral-500 flex-shrink-0" />
+                <ChevronDown size={16} className="text-ex-text-subtle flex-shrink-0" />
               </button>
 
               {showSortMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowSortMenu(false)} />
-                  <div className="absolute top-full left-0 mt-2 z-50 bg-white dark:bg-neutral-800 rounded-lg border-2 border-black dark:border-neutral-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] py-1 min-w-[180px]">
+                  <div className="absolute top-full left-0 mt-2 z-50 ex-menu min-w-[180px] ex-animate-in">
                     {sortOptions.map((option) => (
                       <button
                         key={option.field}
@@ -734,17 +729,13 @@ export const Dashboard: React.FC = () => {
                           e.stopPropagation();
                           handleSortFieldChange(option.field);
                         }}
-                        className={clsx(
-                          "w-full px-3 py-2 text-sm text-left flex items-center gap-2 transition-colors",
-                          sortConfig.field === option.field
-                            ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-bold"
-                            : "text-slate-600 dark:text-neutral-300 hover:bg-slate-50 dark:hover:bg-neutral-700 hover:text-indigo-600 dark:hover:text-indigo-400"
-                        )}
+                        data-active={sortConfig.field === option.field}
+                        className="ex-menu-item"
                       >
-                        <span className="text-indigo-600 dark:text-indigo-400">{option.icon}</span>
-                        <span>{option.label}</span>
+                        <span className="text-ex-primary flex-shrink-0">{option.icon}</span>
+                        <span className="flex-1">{option.label}</span>
                         {sortConfig.field === option.field && (
-                          <span className="ml-auto text-xs">✓</span>
+                          <span className="text-xs">✓</span>
                         )}
                       </button>
                     ))}
@@ -755,93 +746,68 @@ export const Dashboard: React.FC = () => {
 
             <button
               onClick={handleSortDirectionToggle}
-              className={clsx(
-                "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all border-2 border-black dark:border-neutral-700 h-[42px] min-w-[42px]",
-                "bg-white dark:bg-neutral-900 text-indigo-600 dark:text-indigo-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
-              )}
+              className="ex-btn-icon"
               title={sortConfig.direction === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
             >
-              {sortConfig.direction === 'asc' ? (
-                <ArrowUp size={18} />
-              ) : (
-                <ArrowDown size={18} />
-              )}
+              {sortConfig.direction === 'asc' ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
             </button>
           </div>
         </div>
 
         <div className="flex items-center gap-3 w-full lg:w-auto justify-start lg:justify-end flex-wrap">
-          <div className="flex items-center gap-2 mr-2">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleSelectAll}
               disabled={sortedDrawings.length === 0}
-              className={clsx(
-                "h-[42px] w-[42px] flex items-center justify-center rounded-xl border-2 transition-all",
-                sortedDrawings.length > 0
-                  ? "bg-white dark:bg-neutral-800 border-black dark:border-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-1 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
-                  : "bg-slate-100 dark:bg-neutral-900 border-slate-300 dark:border-neutral-800 text-slate-300 dark:text-neutral-700 cursor-not-allowed"
-              )}
-              title={allSelected ? "Deselect All" : "Select All"}
+              className="ex-btn-icon"
+              title={allSelected ? 'Deselect All' : 'Select All'}
             >
               {allSelected ? <CheckSquare size={20} /> : <Square size={20} />}
             </button>
 
-          <button
-            onClick={handleBulkDeleteClick}
-            disabled={!hasSelection || isSharedView}
-            className={clsx(
-              "h-[42px] w-[42px] flex items-center justify-center rounded-xl border-2 transition-all",
-              hasSelection && !isSharedView
-                ? "bg-white dark:bg-neutral-800 border-black dark:border-neutral-700 text-rose-600 dark:text-rose-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-1 hover:bg-rose-50 dark:hover:bg-rose-900/30"
-                : "bg-slate-100 dark:bg-neutral-900 border-slate-300 dark:border-neutral-800 text-slate-300 dark:text-neutral-700 cursor-not-allowed"
-            )}
-            title={isTrashView ? "Delete Permanently" : "Move to Trash"}
-          >
-            <Trash2 size={20} />
-          </button>
+            <button
+              onClick={handleBulkDeleteClick}
+              disabled={!hasSelection || isSharedView}
+              data-variant="danger"
+              className="ex-btn-icon"
+              title={isTrashView ? 'Delete Permanently' : 'Move to Trash'}
+            >
+              <Trash2 size={20} />
+            </button>
 
-          <button
-            onClick={handleBulkDuplicate}
-            disabled={!hasSelection || isTrashView || isSharedView}
-            className={clsx(
-              "h-[42px] w-[42px] flex items-center justify-center rounded-xl border-2 transition-all",
-              hasSelection && !isTrashView && !isSharedView
-                ? "bg-white dark:bg-neutral-800 border-black dark:border-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-1 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
-                : "bg-slate-100 dark:bg-neutral-900 border-slate-300 dark:border-neutral-800 text-slate-300 dark:text-neutral-700 cursor-not-allowed"
-            )}
-            title="Duplicate Selected"
-          >
-            <Copy size={20} />
-          </button>
+            <button
+              onClick={handleBulkDuplicate}
+              disabled={!hasSelection || isTrashView || isSharedView}
+              className="ex-btn-icon"
+              title="Duplicate Selected"
+            >
+              <Copy size={20} />
+            </button>
 
             <div className="relative">
               <button
                 onClick={() => hasSelection && setShowBulkMoveMenu(!showBulkMoveMenu)}
                 disabled={!hasSelection || isSharedView}
-                className={clsx(
-                  "h-[42px] w-[42px] flex items-center justify-center rounded-xl border-2 transition-all",
-                  hasSelection && !isSharedView
-                    ? "bg-white dark:bg-neutral-800 border-black dark:border-neutral-700 text-emerald-600 dark:text-emerald-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-1 hover:bg-emerald-50 dark:hover:bg-emerald-900/30"
-                    : "bg-slate-100 dark:bg-neutral-900 border-slate-300 dark:border-neutral-800 text-slate-300 dark:text-neutral-700 cursor-not-allowed"
-                )}
+                data-variant="success"
+                className="ex-btn-icon"
                 title="Move Selected"
               >
                 <div className="relative">
                   <Folder size={20} />
-                  <ArrowRight size={12} className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-800 rounded-full border border-current" strokeWidth={3} />
+                  <ArrowRight size={12} className="absolute -bottom-1 -right-1 bg-ex-surface rounded-full" strokeWidth={3} />
                 </div>
               </button>
 
               {showBulkMoveMenu && hasSelection && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowBulkMoveMenu(false)} />
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-neutral-800 rounded-xl border-2 border-black dark:border-neutral-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] z-50 py-1 max-h-64 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-100">
-                    <div className="px-3 py-2 text-[10px] font-bold uppercase text-slate-400 dark:text-neutral-500 tracking-wider border-b border-slate-100 dark:border-neutral-700 mb-1">
-                      Move {selectedIds.size} items to...
+                  <div className="absolute right-0 top-full mt-2 w-60 z-50 ex-menu max-h-64 overflow-y-auto custom-scrollbar ex-animate-in">
+                    <div className="ex-menu-label">
+                      Move {selectedIds.size} items to…
                     </div>
                     <button
                       onClick={() => handleBulkMove(null)}
-                      className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                      className="ex-menu-item"
                     >
                       <Inbox size={14} /> Unorganized
                     </button>
@@ -849,7 +815,7 @@ export const Dashboard: React.FC = () => {
                       <button
                         key={c.id}
                         onClick={() => handleBulkMove(c.id)}
-                        className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors truncate"
+                        className="ex-menu-item"
                       >
                         <Folder size={14} /> <span className="truncate">{c.name}</span>
                       </button>
@@ -875,29 +841,19 @@ export const Dashboard: React.FC = () => {
           <button
             onClick={() => document.getElementById('dashboard-import')?.click()}
             disabled={isTrashView || isSharedView}
-            className={clsx(
-              "h-[42px] w-full sm:w-auto flex items-center justify-center gap-2 px-6 rounded-xl border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] transition-all font-bold text-sm whitespace-nowrap",
-              isTrashView || isSharedView
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-700 shadow-none cursor-not-allowed"
-                : "bg-emerald-600 dark:bg-neutral-800 text-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-1 active:translate-y-0 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:active:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]"
-            )}
+            className="ex-btn ex-btn-ghost w-full sm:w-auto"
           >
-            <Upload size={18} strokeWidth={2.5} />
+            <Upload size={16} strokeWidth={2.5} />
             Import
           </button>
 
           <button
             onClick={handleCreateDrawing}
             disabled={isTrashView || isSharedView}
-            className={clsx(
-              "h-[42px] w-full sm:w-auto flex items-center justify-center gap-2 px-6 rounded-xl border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] transition-all font-bold text-sm whitespace-nowrap",
-              isTrashView || isSharedView
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-700 shadow-none cursor-not-allowed"
-                : "bg-indigo-600 dark:bg-neutral-800 text-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-1 active:translate-y-0 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:active:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]"
-            )}
+            className="ex-btn ex-btn-primary w-full sm:w-auto"
           >
-            <Plus size={18} strokeWidth={2.5} />
-            New Drawing
+            <Plus size={16} strokeWidth={2.5} />
+            New drawing
           </button>
         </div>
       </div>
@@ -923,15 +879,14 @@ export const Dashboard: React.FC = () => {
         }}
       >
         {isDraggingFile && (
-          <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm border-4 border-dashed border-indigo-400 rounded-3xl flex flex-col items-center justify-center animate-in fade-in duration-200">
-            <div className="bg-indigo-50 p-6 sm:p-8 rounded-full mb-5 sm:mb-6 shadow-sm">
-              <Inbox size={56} className="text-indigo-600 hidden sm:block" />
-              <Inbox size={44} className="text-indigo-600 sm:hidden" />
+          <div className="absolute inset-0 z-50 bg-ex-surface/85 backdrop-blur-sm border-2 border-dashed border-ex-primary rounded-ex-xl flex flex-col items-center justify-center ex-animate-in">
+            <div className="bg-ex-primary-soft p-6 sm:p-8 rounded-full mb-5 sm:mb-6">
+              <Inbox size={48} className="text-ex-primary" />
             </div>
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2 text-center px-4">Drop files to import</h3>
-            <p className="text-slate-500 text-base sm:text-lg max-w-sm sm:max-w-md text-center px-4">
+            <h3 className="ex-title text-2xl sm:text-3xl mb-2 text-center px-4">Drop files to import</h3>
+            <p className="text-ex-text-muted text-base sm:text-lg max-w-sm sm:max-w-md text-center px-4">
               Drop .excalidraw or .json files here to add them to
-              <span className="font-bold text-indigo-600 mx-1">
+              <span className="font-semibold text-ex-primary mx-1">
                 {viewTitle}
               </span>
             </p>
@@ -939,31 +894,31 @@ export const Dashboard: React.FC = () => {
         )}
 
         {isLoading && drawings.length === 0 ? (
-          <div className="flex justify-center items-center h-64 text-indigo-600">
+          <div className="flex justify-center items-center h-64 text-ex-primary">
             <Loader2 size={32} className="animate-spin" />
           </div>
         ) : (
           <div
-            className={clsx("grid gap-3 sm:gap-4 pb-16 sm:pb-24 transition-all duration-300", isDraggingFile && "opacity-20 blur-sm")}
+            className={clsx('grid gap-4 pb-16 sm:pb-24 transition-all duration-300', isDraggingFile && 'opacity-20 blur-sm')}
             style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}
           >
             {sortedDrawings.length === 0 ? (
-              <div className="col-span-full flex flex-col items-center justify-center py-16 sm:py-32 text-slate-400 dark:text-neutral-500 border-2 border-dashed border-slate-200 dark:border-neutral-700 rounded-3xl bg-slate-50/50 dark:bg-neutral-800/50">
-                <div className="w-20 h-20 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center mb-6">
-                  {isTrashView ? <Trash2 size={32} className="text-slate-300 dark:text-slate-600" /> : <Inbox size={32} className="text-slate-300 dark:text-slate-600" />}
+              <div className="col-span-full flex flex-col items-center justify-center py-16 sm:py-32 border border-dashed border-ex-border-strong rounded-ex-xl bg-ex-surface-muted">
+                <div className="w-20 h-20 bg-ex-surface rounded-full border border-ex-border flex items-center justify-center mb-6 shadow-ex-soft">
+                  {isTrashView ? <Trash2 size={28} className="text-ex-text-subtle" /> : <Inbox size={28} className="text-ex-text-subtle" />}
                 </div>
-                <p className="text-lg font-semibold text-slate-600 dark:text-slate-400">
-                  {isTrashView ? "Your trash is empty" : "No drawings found"}
+                <p className="ex-title text-xl text-ex-text">
+                  {isTrashView ? 'Your trash is empty' : 'No drawings found'}
                 </p>
                 {!isTrashView && (
-                  <p className="text-sm mt-2 text-slate-400 dark:text-neutral-500 max-w-xs text-center">
-                    {search ? `No results for "${search}"` : "Create a new drawing to get started!"}
+                  <p className="text-sm mt-2 text-ex-text-muted max-w-xs text-center">
+                    {search ? `No results for "${search}"` : 'Create a new drawing to get started.'}
                   </p>
                 )}
                 {search && (
                   <button
                     onClick={() => setSearch('')}
-                    className="mt-4 text-indigo-600 dark:text-indigo-400 font-medium hover:underline text-sm"
+                    className="mt-4 text-ex-primary font-semibold hover:underline text-sm"
                   >
                     Clear search
                   </button>
@@ -1000,9 +955,9 @@ export const Dashboard: React.FC = () => {
 
         <div ref={loaderRef} className="py-8 flex justify-center items-center h-20">
           {isFetchingMore && (
-            <div className="flex items-center gap-2 text-indigo-600 font-bold animate-in fade-in slide-in-from-bottom-2">
-              <Loader2 size={24} className="animate-spin" />
-              <span>Loading more...</span>
+            <div className="flex items-center gap-2 text-ex-primary font-semibold">
+              <Loader2 size={20} className="animate-spin" />
+              <span>Loading more…</span>
             </div>
           )}
         </div>

@@ -19,7 +19,7 @@ interface SidebarProps {
 }
 
 interface SidebarItemProps {
-  id: string | null; // null for Unorganized
+  id: string | null;
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
@@ -54,7 +54,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
 
   return (
-    <div className="relative group/item pl-3 pr-2">
+    <div className="relative group/item px-2">
       {isEditing ? (
         <form onSubmit={onEditSubmit} className="py-1">
           <input
@@ -62,7 +62,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
             type="text"
             value={editValue}
             onChange={(e) => onEditChange?.(e.target.value)}
-            className="w-full px-3 py-2 text-sm bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] outline-none font-bold text-slate-900 dark:text-white"
+            className="ex-input"
             onBlur={onEditBlur}
           />
         </form>
@@ -89,19 +89,15 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
             setIsDragOver(false);
             onDrop?.(e, id);
           }}
-          className={clsx(
-            "w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 border-2 group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:focus-visible:ring-2 dark:focus-visible:ring-neutral-500",
-            isActive || isDragOver
-              ? "bg-indigo-50 dark:bg-neutral-800 text-indigo-900 dark:text-neutral-200 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] -translate-y-0.5"
-              : "text-slate-600 dark:text-neutral-400 border-transparent hover:bg-slate-50 dark:hover:bg-neutral-800 hover:border-black dark:hover:border-neutral-700 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5"
-          )}
+          data-active={isActive || isDragOver}
+          className="ex-nav-item outline-none focus-visible:ring-2 focus-visible:ring-ex-primary"
         >
-          <span className={clsx("transition-colors duration-200", isActive || isDragOver ? "text-indigo-900 dark:text-neutral-200" : "text-slate-400 dark:text-neutral-500 group-hover:text-slate-900 dark:group-hover:text-neutral-200")}>
+          <span className={clsx('flex-shrink-0', (isActive || isDragOver) ? 'text-ex-primary' : 'text-ex-text-subtle')}>
             {icon}
           </span>
-          <span className="min-w-0 flex-1 text-left font-bold">{label}</span>
+          <span className="min-w-0 flex-1 text-left truncate">{label}</span>
           {extraAction && (
-            <div className="opacity-0 group-hover/item:opacity-100 transition-all duration-200 flex items-center gap-1 flex-shrink-0">
+            <div className="opacity-0 group-hover/item:opacity-100 transition-opacity duration-150 flex items-center gap-1 flex-shrink-0">
               {extraAction}
             </div>
           )}
@@ -168,43 +164,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       <div className="w-full flex flex-col h-full bg-transparent">
-        <div className="p-4 sm:p-5 pb-2">
-          <h1 className="text-2xl text-slate-900 dark:text-white flex items-center gap-3 tracking-tight" style={{ fontFamily: 'Excalifont' }}>
-            <Logo className="w-10 h-10" />
-            <span className="mt-1">ExcaliDash</span>
-            <span className="text-xs font-bold text-red-500 mt-2" style={{ fontFamily: 'sans-serif' }}>BETA</span>
+        <div className="p-4 sm:p-5 pb-3">
+          <h1 className="text-2xl flex items-center gap-3">
+            <Logo className="w-9 h-9" />
+            <span className="ex-brand mt-1">ExcaliDash</span>
+            <span className="text-[10px] font-bold text-ex-danger mt-1.5 px-1.5 py-0.5 rounded-md bg-ex-danger-soft">BETA</span>
           </h1>
         </div>
 
+        <div className="ex-divider mx-4" />
+
         <nav
-          className="flex-1 overflow-y-auto py-3 sm:py-4 space-y-4 sm:space-y-8 custom-scrollbar"
+          className="flex-1 overflow-y-auto py-3 space-y-5 custom-scrollbar"
           onContextMenu={handleBackgroundContextMenu}
         >
-          <div className="space-y-1">
-            <div className="px-6 pb-2 text-[11px] font-bold text-slate-400 dark:text-neutral-500 uppercase tracking-wider">
-              Library
-            </div>
-            <div className="pl-3 pr-2">
+          <div className="space-y-0.5">
+            <div className="px-5 pb-2 ex-section-label">Library</div>
+
+            <div className="px-2">
               <button
                 onClick={() => onSelectCollection(undefined)}
-                className={clsx(
-                  "w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold rounded-lg transition-all duration-200 border-2",
-                  selectedCollectionId === undefined
-                    ? "bg-indigo-50 dark:bg-neutral-800 text-indigo-900 dark:text-neutral-200 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] -translate-y-0.5"
-                    : "text-slate-600 dark:text-neutral-400 border-transparent hover:bg-slate-50 dark:hover:bg-neutral-800 hover:border-black dark:hover:border-neutral-700 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5"
-                )}
+                data-active={selectedCollectionId === undefined}
+                className="ex-nav-item"
               >
-                <LayoutGrid size={18} className={clsx(selectedCollectionId === undefined ? "text-indigo-900 dark:text-neutral-200" : "text-slate-400 dark:text-neutral-500")} />
+                <LayoutGrid size={18} className={clsx('flex-shrink-0', selectedCollectionId === undefined ? 'text-ex-primary' : 'text-ex-text-subtle')} />
                 <span className="min-w-0 flex-1 text-left">All Drawings</span>
               </button>
             </div>
 
             <SidebarItem
-              id={"shared"}
+              id={'shared'}
               icon={<Shield size={18} />}
               label="Shared with me"
-              isActive={selectedCollectionId === "shared"}
-              onClick={() => onSelectCollection("shared")}
+              isActive={selectedCollectionId === 'shared'}
+              onClick={() => onSelectCollection('shared')}
             />
 
             <SidebarItem
@@ -217,12 +210,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             />
           </div>
 
-          <div className="space-y-1">
-            <div className="flex items-center justify-between px-6 pb-2 group/header">
-              <span className="text-[11px] font-bold text-slate-400 dark:text-neutral-500 uppercase tracking-wider">Collections</span>
+          <div className="space-y-0.5">
+            <div className="flex items-center justify-between px-5 pb-2 group/header">
+              <span className="ex-section-label">Collections</span>
               <button
                 onClick={(e) => { e.stopPropagation(); setIsCreating(true); }}
-                className="p-1 text-slate-400 dark:text-neutral-500 hover:text-indigo-600 dark:hover:text-neutral-200 hover:bg-indigo-50 dark:hover:bg-neutral-800 rounded-md transition-all opacity-0 group-hover/header:opacity-100"
+                className="p-1 text-ex-text-subtle hover:text-ex-primary hover:bg-ex-primary-soft rounded-md transition-colors opacity-0 group-hover/header:opacity-100"
                 title="New Collection"
               >
                 <Plus size={14} strokeWidth={2.5} />
@@ -230,14 +223,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {isCreating && (
-              <form onSubmit={handleCreateSubmit} className="mb-2 px-4" onClick={e => e.stopPropagation()}>
+              <form onSubmit={handleCreateSubmit} className="mb-1 px-2" onClick={e => e.stopPropagation()}>
                 <input
                   autoFocus
                   type="text"
                   value={newCollectionName}
                   onChange={(e) => setNewCollectionName(e.target.value)}
-                  placeholder="New Collection..."
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] outline-none placeholder:text-slate-400 dark:placeholder:text-neutral-500 font-bold text-slate-900 dark:text-white"
+                  placeholder="New collection..."
+                  className="ex-input"
                   onBlur={() => !newCollectionName && setIsCreating(false)}
                 />
               </form>
@@ -267,7 +260,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </nav>
 
-        <div className="px-3 pt-3 sm:pt-4 pb-3 sm:pb-4 border-t border-slate-200/50 dark:border-slate-700/50 space-y-2">
+        <div className="px-2 pt-3 pb-3 border-t border-ex-divider space-y-0.5">
           <button
             onDragOver={(e) => {
               e.preventDefault();
@@ -282,28 +275,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onClick={() => {
               navigate('/collections?id=trash');
             }}
+            data-active={selectedCollectionId === 'trash' || isTrashDragOver}
             className={clsx(
-              "w-full flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-xl transition-all duration-200 border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]",
-              selectedCollectionId === 'trash' || isTrashDragOver
-                ? "bg-rose-50 dark:bg-rose-900/30 text-rose-900 dark:text-rose-300 -translate-y-0.5"
-                : "bg-white dark:bg-neutral-900 text-slate-900 dark:text-neutral-200 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-900 dark:hover:text-rose-300 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5"
+              'ex-nav-item',
+              (selectedCollectionId === 'trash' || isTrashDragOver) && 'text-ex-danger bg-ex-danger-soft'
             )}
           >
-            <Trash2 size={18} />
+            <Trash2 size={18} className={clsx('flex-shrink-0', (selectedCollectionId === 'trash' || isTrashDragOver) ? 'text-ex-danger' : 'text-ex-text-subtle')} />
             <span className="min-w-0 flex-1 text-left">Trash</span>
           </button>
 
           {authEnabled && (
             <button
               onClick={() => navigate('/profile')}
-              className={clsx(
-                "w-full flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-xl transition-all duration-200 border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]",
-                selectedCollectionId === 'PROFILE'
-                  ? "bg-indigo-50 dark:bg-neutral-800 text-indigo-900 dark:text-neutral-200 -translate-y-0.5"
-                  : "bg-white dark:bg-neutral-900 text-slate-900 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-neutral-800 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5"
-              )}
+              className="ex-nav-item"
             >
-              <User size={18} />
+              <User size={18} className="text-ex-text-subtle flex-shrink-0" />
               <span className="min-w-0 flex-1 text-left">Profile</span>
             </button>
           )}
@@ -311,54 +298,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {authEnabled && isAdmin && (
             <button
               onClick={() => navigate('/admin')}
-              className={clsx(
-                "w-full flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-xl transition-all duration-200 border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]",
-                selectedCollectionId === 'ADMIN'
-                  ? "bg-indigo-50 dark:bg-neutral-800 text-indigo-900 dark:text-neutral-200 -translate-y-0.5"
-                  : "bg-white dark:bg-neutral-900 text-slate-900 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-neutral-800 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5"
-              )}
+              className="ex-nav-item"
             >
-              <Shield size={18} />
+              <Shield size={18} className="text-ex-text-subtle flex-shrink-0" />
               <span className="min-w-0 flex-1 text-left">Admin</span>
             </button>
           )}
 
           <button
             onClick={() => navigate('/settings')}
-            className={clsx(
-              "w-full flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-xl transition-all duration-200 border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]",
-              selectedCollectionId === 'SETTINGS'
-                ? "bg-indigo-50 dark:bg-neutral-800 text-indigo-900 dark:text-neutral-200 -translate-y-0.5"
-                : "bg-white dark:bg-neutral-900 text-slate-900 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-neutral-800 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5"
-            )}
+            className="ex-nav-item"
           >
-            <SettingsIcon size={18} />
+            <SettingsIcon size={18} className="text-ex-text-subtle flex-shrink-0" />
             <span className="min-w-0 flex-1 text-left">Settings</span>
           </button>
 
           {authEnabled && (
-            <div className="mt-auto pt-4 border-t-2 border-slate-200 dark:border-neutral-700">
+            <div className="mt-3 pt-3 border-t border-ex-divider">
               {user && (
-                <div className="py-2 text-xs text-slate-500 dark:text-neutral-500 mb-2">
-                  <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center">
+                <div className="px-2 pb-2 text-xs">
+                  <div className="grid grid-cols-[auto_1fr] items-center gap-3">
+                    <div className="w-9 h-9 rounded-ex bg-ex-primary text-ex-primary-contrast font-bold flex items-center justify-center shadow-ex-soft">
                       {getInitialsFromName(user.name)}
                     </div>
                     <div className="min-w-0 text-left">
-                      <div className="font-semibold text-slate-700 dark:text-neutral-300 truncate leading-tight">{user.name}</div>
-                      <div className="truncate leading-tight">{user.email}</div>
+                      <div className="font-semibold text-ex-text truncate leading-tight">{user.name}</div>
+                      <div className="text-ex-text-muted truncate leading-tight">{user.email}</div>
                     </div>
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 invisible" aria-hidden="true" />
                   </div>
                 </div>
               )}
-              <button
-                onClick={logout}
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-xl transition-all duration-200 border-2 border-rose-300 dark:border-rose-700 bg-white dark:bg-neutral-900 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 cursor-pointer"
-              >
-                <LogOut size={18} />
-                <span className="min-w-0 flex-1 text-left">Logout</span>
-              </button>
+              <div className="px-2">
+                <button
+                  onClick={logout}
+                  className="ex-nav-item w-full text-ex-text-muted hover:!text-ex-danger hover:!bg-ex-danger-soft"
+                >
+                  <LogOut size={18} className="flex-shrink-0" />
+                  <span className="min-w-0 flex-1 text-left">Logout</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -371,7 +349,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); }}
         >
           <div
-            className="absolute bg-white dark:bg-neutral-800 rounded-lg border-2 border-black dark:border-neutral-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)] py-1 min-w-[160px] animate-in fade-in zoom-in-95 duration-100"
+            className="absolute ex-menu min-w-[180px] ex-animate-in"
             style={{ top: contextMenu.y, left: contextMenu.x }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -386,9 +364,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }
                     setContextMenu(null);
                   }}
-                  className="w-full px-3 py-2 text-sm text-left text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-2"
+                  className="ex-menu-item"
                 >
-                  <Edit2 size={14} /> Rename Collection
+                  <Edit2 size={14} /> Rename collection
                 </button>
 
                 <button
@@ -396,9 +374,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     setCollectionToDelete(contextMenu.id!);
                     setContextMenu(null);
                   }}
-                  className="w-full px-3 py-2 text-sm text-left text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 flex items-center gap-2"
+                  className="ex-menu-item"
+                  data-variant="danger"
                 >
-                  <Trash2 size={14} /> Delete Collection
+                  <Trash2 size={14} /> Delete collection
                 </button>
               </>
             ) : (
@@ -407,9 +386,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   setIsCreating(true);
                   setContextMenu(null);
                 }}
-                className="w-full px-3 py-2 text-sm text-left text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-2"
+                className="ex-menu-item"
               >
-                <Plus size={14} /> New Collection
+                <Plus size={14} /> New collection
               </button>
             )}
           </div>
@@ -429,8 +408,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }}
         onCancel={() => setCollectionToDelete(null)}
       />
-
-
     </>
   );
 };
