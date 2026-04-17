@@ -8,10 +8,10 @@ cd "$ROOT_DIR"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/build-and-push-dockerhub.sh --username <dockerhub-user> [options]
+  scripts/build-and-push-dockerhub.sh [options]
 
 Options:
-  --username <name>       Docker Hub username or org. Can also use DOCKERHUB_USERNAME.
+  --username <name>       Docker Hub username or org. Can also use DOCKERHUB_USERNAME. Defaults to gwynbleidd85.
   --tag <tag>             Image tag to publish. Defaults to VERSION file contents.
   --repository <name>     Base repository name. Defaults to excalidash.
   --platforms <list>      buildx platforms. Defaults to linux/amd64,linux/arm64.
@@ -21,12 +21,12 @@ Options:
   -h, --help              Show this help.
 
 Examples:
-  scripts/build-and-push-dockerhub.sh --username mydockeruser --tag 0.4.28 --latest
+  scripts/build-and-push-dockerhub.sh --tag 0.4.28 --latest
   DOCKERHUB_USERNAME=mydockeruser scripts/build-and-push-dockerhub.sh --tag custom-dev --build-label development
 EOF
 }
 
-DOCKER_USERNAME="${DOCKERHUB_USERNAME:-}"
+DOCKER_USERNAME="${DOCKERHUB_USERNAME:-gwynbleidd85}"
 IMAGE_NAME="excalidash"
 VERSION="$(tr -d '[:space:]' < VERSION)"
 PLATFORMS="linux/amd64,linux/arm64"
