@@ -172,7 +172,7 @@ export const registerDrawingRoutes = (
       return res.send(cachedBody);
     }
 
-    const summarySelect: Prisma.DrawingSelect = {
+    const baseSummarySelect: Prisma.DrawingSelect = {
       id: true,
       name: true,
       collectionId: true,
@@ -180,6 +180,23 @@ export const registerDrawingRoutes = (
       version: true,
       createdAt: true,
       updatedAt: true,
+      userId: true,
+      collection: {
+        select: {
+          visibility: true,
+          sharePermission: true,
+        },
+      },
+      permissions: {
+        where: { granteeUserId: req.user.id },
+        select: { permission: true },
+      },
+    };
+    const fullDrawingSelect: Prisma.DrawingSelect = {
+      ...baseSummarySelect,
+      elements: true,
+      appState: true,
+      files: true,
     };
 
     const orderBy: Prisma.DrawingOrderByWithRelationInput =
@@ -192,27 +209,54 @@ export const registerDrawingRoutes = (
     const queryOptions: Prisma.DrawingFindManyArgs = { where, orderBy };
     if (parsedLimit !== undefined) queryOptions.take = parsedLimit;
     if (parsedOffset !== undefined) queryOptions.skip = parsedOffset;
-    if (!shouldIncludeData) queryOptions.select = summarySelect;
+    queryOptions.select = shouldIncludeData ? fullDrawingSelect : baseSummarySelect;
 
     const [drawings, totalCount] = await Promise.all([
       prisma.drawing.findMany(queryOptions),
       prisma.drawing.count({ where }),
     ]);
 
+    const resolveAccessLevel = (drawing: any) => {
+      if (drawing.userId === req.user!.id) return "owner";
+
+      const explicitPermission = normalizeDrawingPermission(
+        Array.isArray(drawing.permissions) ? drawing.permissions[0]?.permission : null
+      );
+      if (explicitPermission) return explicitPermission;
+
+      const collectionPermission =
+        drawing.collection?.visibility === "shared"
+          ? normalizeDrawingPermission(drawing.collection.sharePermission)
+          : null;
+
+      return collectionPermission ?? "none";
+    };
+
+    const normalizeDrawingRow = (drawing: any) => {
+      const {
+        permissions: _permissions,
+        collection: _collection,
+        userId: _userId,
+        ...rest
+      } = drawing;
+
+      return {
+        ...rest,
+        collectionId: toPublicTrashCollectionId(drawing.collectionId, req.user!.id),
+        accessLevel: resolveAccessLevel(drawing),
+      };
+    };
+
     let responsePayload: any[] = drawings as any[];
     if (shouldIncludeData) {
       responsePayload = (drawings as any[]).map((d: any) => ({
-        ...d,
-        collectionId: toPublicTrashCollectionId(d.collectionId, req.user!.id),
+        ...normalizeDrawingRow(d),
         elements: parseJsonField(d.elements, []),
         appState: parseJsonField(d.appState, {}),
         files: parseJsonField(d.files, {}),
       }));
     } else {
-      responsePayload = (drawings as any[]).map((d: any) => ({
-        ...d,
-        collectionId: toPublicTrashCollectionId(d.collectionId, req.user!.id),
-      }));
+      responsePayload = (drawings as any[]).map((d: any) => normalizeDrawingRow(d));
     }
 
     const finalResponse = {

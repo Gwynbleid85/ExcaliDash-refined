@@ -35,6 +35,15 @@ describe("Drawings - Shared With Me", () => {
     await prisma.$disconnect();
   });
 
+  const createAccessToken = (user: { id: string; email: string }) => {
+    const signOptions: SignOptions = { expiresIn: config.jwtAccessExpiresIn as StringValue };
+    return jwt.sign(
+      { userId: user.id, email: user.email, type: "access" },
+      config.jwtSecret,
+      signOptions
+    );
+  };
+
   it("does not include drawings you own even if you have a self permission row", async () => {
     const passwordHash = await bcrypt.hash("password123", 10);
 
@@ -106,12 +115,7 @@ describe("Drawings - Shared With Me", () => {
       },
     });
 
-    const signOptions: SignOptions = { expiresIn: config.jwtAccessExpiresIn as StringValue };
-    const tokenA = jwt.sign(
-      { userId: userA.id, email: userA.email, type: "access" },
-      config.jwtSecret,
-      signOptions
-    );
+    const tokenA = createAccessToken(userA);
 
     const response = await request(app)
       .get("/drawings/shared")
@@ -124,5 +128,124 @@ describe("Drawings - Shared With Me", () => {
     expect(ids).toContain(drawingOwnedByB.id);
     expect(ids).not.toContain(drawingOwnedByA.id);
   });
-});
 
+  it("returns owner accessLevel for owned drawings in the default /drawings list", async () => {
+    const passwordHash = await bcrypt.hash("password123", 10);
+
+    const owner = await prisma.user.create({
+      data: {
+        email: "owner-list@test.local",
+        passwordHash,
+        name: "Owner List",
+        role: "USER",
+        isActive: true,
+      },
+      select: { id: true, email: true },
+    });
+
+    const drawing = await prisma.drawing.create({
+      data: {
+        name: "Owner Drawing",
+        elements: "[]",
+        appState: "{}",
+        files: "{}",
+        userId: owner.id,
+        collectionId: null,
+        version: 1,
+      },
+      select: { id: true },
+    });
+
+    const response = await request(app)
+      .get("/drawings")
+      .set("User-Agent", userAgent)
+      .set("Authorization", `Bearer ${createAccessToken(owner)}`);
+
+    expect(response.status).toBe(200);
+    const listed = (response.body.drawings as any[]).find((item) => item.id === drawing.id);
+    expect(listed?.accessLevel).toBe("owner");
+  });
+
+  it("computes /drawings accessLevel per row for shared collections", async () => {
+    const passwordHash = await bcrypt.hash("password123", 10);
+
+    const owner = await prisma.user.create({
+      data: {
+        email: "shared-owner@test.local",
+        passwordHash,
+        name: "Shared Owner",
+        role: "USER",
+        isActive: true,
+      },
+      select: { id: true, email: true },
+    });
+
+    const viewer = await prisma.user.create({
+      data: {
+        email: "shared-viewer@test.local",
+        passwordHash,
+        name: "Shared Viewer",
+        role: "USER",
+        isActive: true,
+      },
+      select: { id: true, email: true },
+    });
+
+    const collection = await prisma.collection.create({
+      data: {
+        name: "Team Space",
+        userId: owner.id,
+        visibility: "shared",
+        sharePermission: "view",
+      },
+      select: { id: true },
+    });
+
+    const collectionViewDrawing = await prisma.drawing.create({
+      data: {
+        name: "Collection View",
+        elements: "[]",
+        appState: "{}",
+        files: "{}",
+        userId: owner.id,
+        collectionId: collection.id,
+        version: 1,
+      },
+      select: { id: true },
+    });
+
+    const explicitEditDrawing = await prisma.drawing.create({
+      data: {
+        name: "Explicit Edit",
+        elements: "[]",
+        appState: "{}",
+        files: "{}",
+        userId: owner.id,
+        collectionId: collection.id,
+        version: 1,
+      },
+      select: { id: true },
+    });
+
+    await prisma.drawingPermission.create({
+      data: {
+        drawingId: explicitEditDrawing.id,
+        granteeUserId: viewer.id,
+        permission: "edit",
+        createdByUserId: owner.id,
+      },
+    });
+
+    const response = await request(app)
+      .get("/drawings")
+      .query({ collectionId: collection.id })
+      .set("User-Agent", userAgent)
+      .set("Authorization", `Bearer ${createAccessToken(viewer)}`);
+
+    expect(response.status).toBe(200);
+
+    const listedById = new Map((response.body.drawings as any[]).map((item) => [item.id, item]));
+    expect(listedById.get(collectionViewDrawing.id)?.accessLevel).toBe("view");
+    expect(listedById.get(explicitEditDrawing.id)?.accessLevel).toBe("edit");
+  });
+});
