@@ -19,4 +19,7 @@ export interface Collection {
   id: string;
   name: string;
   createdAt: number;
+  visibility?: "private" | "shared";
+  sharePermission?: "view" | "edit";
+  isOwner?: boolean;
 }

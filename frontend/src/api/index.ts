@@ -628,6 +628,14 @@ export const deleteCollection = async (id: string) => {
   return response.data;
 };
 
+export const updateCollectionShare = async (
+  id: string,
+  params: { visibility: "private" | "shared"; sharePermission?: "view" | "edit" }
+) => {
+  const response = await api.put(`/collections/${id}/share`, params);
+  return response.data;
+};
+
 
 type LibraryItem = Record<string, unknown>;
 

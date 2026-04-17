@@ -125,7 +125,7 @@ export const getDrawingAccess = async (params: {
   if (params.principal?.kind === "user") {
     const drawing = await params.prisma.drawing.findUnique({
       where: { id: params.drawingId },
-      select: { userId: true },
+      select: { userId: true, collectionId: true },
     });
     if (!drawing) return "none";
     if (drawing.userId === params.principal.userId) return "owner";
@@ -140,6 +140,19 @@ export const getDrawingAccess = async (params: {
       select: { permission: true },
     });
     baseAccess = normalizeDrawingPermission(perm?.permission) ?? baseAccess;
+
+    // Collection-level sharing: if no explicit per-drawing permission, check if
+    // the drawing lives in a shared collection.
+    if (baseAccess === "none" && drawing.collectionId) {
+      const collection = await params.prisma.collection.findUnique({
+        where: { id: drawing.collectionId },
+        select: { visibility: true, sharePermission: true },
+      });
+      if (collection?.visibility === "shared") {
+        const collectionPerm = normalizeDrawingPermission(collection.sharePermission);
+        if (collectionPerm) baseAccess = collectionPerm;
+      }
+    }
   }
 
   // Google Docs-style link policy: applies regardless of whether the visitor is signed in.

@@ -259,8 +259,20 @@ export const Dashboard: React.FC = () => {
 
   const isTrashView = selectedCollectionId === 'trash';
   const isSharedView = selectedCollectionId === 'shared';
+
+  // Determine if the current view is a shared collection where the user is NOT the owner.
+  const currentCollection = React.useMemo(
+    () => (typeof selectedCollectionId === 'string' ? collections.find(c => c.id === selectedCollectionId) : undefined),
+    [selectedCollectionId, collections]
+  );
+  const isSharedCollection = currentCollection?.visibility === 'shared';
+  const isCollectionOwner = currentCollection?.isOwner !== false;
+  const canEditCollection = isCollectionOwner || currentCollection?.sharePermission === 'edit';
+  const isReadOnlySharedView = isSharedCollection && !canEditCollection;
+  const disableCreateActions = isTrashView || isSharedView || isReadOnlySharedView;
+  const disableBulkActions = isSharedView || (isSharedCollection && !isCollectionOwner);
   const handleCreateDrawing = async () => {
-    if (isTrashView || isSharedView) return;
+    if (isTrashView || isSharedView || isReadOnlySharedView) return;
     try {
       const targetCollectionId = selectedCollectionId === undefined ? null : selectedCollectionId;
       const { id } = await api.createDrawing('Untitled Drawing', targetCollectionId);
@@ -271,7 +283,7 @@ export const Dashboard: React.FC = () => {
   };
 
   const handleImportDrawings = async (files: FileList | null) => {
-    if (!files || isTrashView || isSharedView) return;
+    if (!files || isTrashView || isSharedView || isReadOnlySharedView) return;
 
     const fileArray = Array.from(files);
     const targetCollectionId = selectedCollectionId === undefined ? null : selectedCollectionId;
@@ -539,7 +551,7 @@ export const Dashboard: React.FC = () => {
   const handleDrop = async (e: React.DragEvent, targetCollectionId: string | null) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isSharedView) return;
+    if (isSharedView || (isSharedCollection && !isCollectionOwner)) return;
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const files = Array.from(e.dataTransfer.files);
@@ -777,7 +789,7 @@ export const Dashboard: React.FC = () => {
 
             <button
               onClick={handleBulkDuplicate}
-              disabled={!hasSelection || isTrashView || isSharedView}
+              disabled={!hasSelection || isTrashView || disableBulkActions}
               className="ex-btn-icon"
               title="Duplicate Selected"
             >
@@ -840,7 +852,7 @@ export const Dashboard: React.FC = () => {
 
           <button
             onClick={() => document.getElementById('dashboard-import')?.click()}
-            disabled={isTrashView || isSharedView}
+            disabled={disableCreateActions}
             className="ex-btn ex-btn-ghost w-full sm:w-auto"
           >
             <Upload size={16} strokeWidth={2.5} />
@@ -849,7 +861,7 @@ export const Dashboard: React.FC = () => {
 
           <button
             onClick={handleCreateDrawing}
-            disabled={isTrashView || isSharedView}
+            disabled={disableCreateActions}
             className="ex-btn ex-btn-primary w-full sm:w-auto"
           >
             <Plus size={16} strokeWidth={2.5} />
@@ -874,7 +886,7 @@ export const Dashboard: React.FC = () => {
           setIsDraggingFile(false);
           dragCounter.current = 0;
           const target = selectedCollectionId === undefined ? null : selectedCollectionId;
-          if (isSharedView) return;
+          if (isSharedView || (isSharedCollection && !isCollectionOwner)) return;
           handleDrop(e, target);
         }}
       >

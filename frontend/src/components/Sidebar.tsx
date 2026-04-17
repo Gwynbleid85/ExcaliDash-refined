@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Folder, Plus, Trash2, Edit2, Archive, FolderOpen, Settings as SettingsIcon, User, LogOut, Shield } from 'lucide-react';
+import { LayoutGrid, Folder, Plus, Trash2, Edit2, Archive, FolderOpen, Settings as SettingsIcon, User, LogOut, Shield, Users, Share2 } from 'lucide-react';
 import type { Collection } from '../types';
 import clsx from 'clsx';
 import { ConfirmModal } from './ConfirmModal';
@@ -126,6 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; type: 'item' | 'background'; id?: string } | null>(null);
   const [collectionToDelete, setCollectionToDelete] = useState<string | null>(null);
   const [isTrashDragOver, setIsTrashDragOver] = useState(false);
+  const [shareToggleCollectionId, setShareToggleCollectionId] = useState<string | null>(null);
 
   useEffect(() => {
     const handleClickOutside = () => setContextMenu(null);
@@ -240,13 +241,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <SidebarItem
                 key={collection.id}
                 id={collection.id}
-                icon={selectedCollectionId === collection.id ? <FolderOpen size={18} /> : <Folder size={18} />}
+                icon={
+                  collection.visibility === 'shared'
+                    ? <Users size={18} />
+                    : selectedCollectionId === collection.id
+                      ? <FolderOpen size={18} />
+                      : <Folder size={18} />
+                }
                 label={collection.name}
                 isActive={selectedCollectionId === collection.id}
                 onClick={() => onSelectCollection(collection.id)}
                 onDoubleClick={() => {
-                  setEditingId(collection.id);
-                  setEditName(collection.name);
+                  if (collection.isOwner !== false) {
+                    setEditingId(collection.id);
+                    setEditName(collection.name);
+                  }
                 }}
                 onContextMenu={(e) => handleItemContextMenu(e, collection.id)}
                 isEditing={editingId === collection.id}
@@ -355,30 +364,54 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             {contextMenu.type === 'item' && contextMenu.id ? (
               <>
-                <button
-                  onClick={() => {
-                    const collection = collections.find(c => c.id === contextMenu.id);
-                    if (collection) {
-                      setEditingId(collection.id);
-                      setEditName(collection.name);
-                    }
-                    setContextMenu(null);
-                  }}
-                  className="ex-menu-item"
-                >
-                  <Edit2 size={14} /> Rename collection
-                </button>
+                {(() => {
+                  const collection = collections.find(c => c.id === contextMenu.id);
+                  const isOwner = collection?.isOwner !== false;
+                  return (
+                    <>
+                      {isOwner && (
+                        <button
+                          onClick={() => {
+                            const c = collections.find(c => c.id === contextMenu.id);
+                            if (c) {
+                              setEditingId(c.id);
+                              setEditName(c.name);
+                            }
+                            setContextMenu(null);
+                          }}
+                          className="ex-menu-item"
+                        >
+                          <Edit2 size={14} /> Rename collection
+                        </button>
+                      )}
 
-                <button
-                  onClick={() => {
-                    setCollectionToDelete(contextMenu.id!);
-                    setContextMenu(null);
-                  }}
-                  className="ex-menu-item"
-                  data-variant="danger"
-                >
-                  <Trash2 size={14} /> Delete collection
-                </button>
+                      {isOwner && (
+                        <button
+                          onClick={() => {
+                            setShareToggleCollectionId(contextMenu.id!);
+                            setContextMenu(null);
+                          }}
+                          className="ex-menu-item"
+                        >
+                          <Share2 size={14} /> Share collection
+                        </button>
+                      )}
+
+                      {isOwner && (
+                        <button
+                          onClick={() => {
+                            setCollectionToDelete(contextMenu.id!);
+                            setContextMenu(null);
+                          }}
+                          className="ex-menu-item"
+                          data-variant="danger"
+                        >
+                          <Trash2 size={14} /> Delete collection
+                        </button>
+                      )}
+                    </>
+                  );
+                })()}
               </>
             ) : (
               <button
@@ -408,6 +441,96 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }}
         onCancel={() => setCollectionToDelete(null)}
       />
+
+      {/* Share collection toggle modal */}
+      {shareToggleCollectionId && (() => {
+        const collection = collections.find(c => c.id === shareToggleCollectionId);
+        if (!collection) return null;
+        const isCurrentlyShared = collection.visibility === 'shared';
+        const currentPermission = collection.sharePermission || 'view';
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+            onClick={() => setShareToggleCollectionId(null)}
+          >
+            <div
+              className="ex-island p-6 rounded-ex-xl w-[380px] space-y-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="ex-title text-xl">Share collection</h3>
+              <p className="text-sm text-ex-text-muted">
+                {isCurrentlyShared
+                  ? 'This collection is visible to all authenticated users.'
+                  : 'Make this collection visible to all authenticated users.'}
+              </p>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isCurrentlyShared}
+                    onChange={async () => {
+                      try {
+                        await (await import('../api')).updateCollectionShare(shareToggleCollectionId, {
+                          visibility: isCurrentlyShared ? 'private' : 'shared',
+                          sharePermission: currentPermission,
+                        });
+                        setShareToggleCollectionId(null);
+                        window.location.reload();
+                      } catch (err) {
+                        console.error('Failed to toggle sharing:', err);
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-ex-border text-ex-primary focus:ring-ex-primary"
+                  />
+                  <span className="text-sm font-medium">Shared with everyone</span>
+                </label>
+
+                {isCurrentlyShared && (
+                  <div className="space-y-2 pl-7">
+                    <label className="text-xs font-medium text-ex-text-muted uppercase tracking-wide">Permission</label>
+                    <div className="flex gap-2">
+                      {(['view', 'edit'] as const).map((perm) => (
+                        <button
+                          key={perm}
+                          onClick={async () => {
+                            try {
+                              await (await import('../api')).updateCollectionShare(shareToggleCollectionId, {
+                                visibility: 'shared',
+                                sharePermission: perm,
+                              });
+                              window.location.reload();
+                            } catch (err) {
+                              console.error('Failed to update permission:', err);
+                            }
+                          }}
+                          className={clsx(
+                            'px-3 py-1.5 rounded-ex-sm text-sm font-medium transition-colors',
+                            currentPermission === perm
+                              ? 'bg-ex-primary text-ex-primary-contrast'
+                              : 'bg-ex-surface-muted text-ex-text hover:bg-ex-primary-soft'
+                          )}
+                        >
+                          {perm === 'view' ? 'Can view' : 'Can edit'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShareToggleCollectionId(null)}
+                  className="ex-btn ex-btn-ghost"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 };
