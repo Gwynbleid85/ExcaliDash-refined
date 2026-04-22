@@ -4,8 +4,7 @@ UPDATE "SystemConfig"
 SET "registrationMode" = CASE
   WHEN "registrationEnabled" = 1 THEN 'public'
   ELSE 'disabled'
-END
-WHERE "registrationMode" NOT IN ('disabled', 'public', 'link_only');
+END;
 
 CREATE TABLE "SignupLink" (
   "id" TEXT NOT NULL PRIMARY KEY,
