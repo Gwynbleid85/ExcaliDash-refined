@@ -1,15 +1,11 @@
-# ExcaliDash v0.4.28
+Release date: 2026-04-17
 
-Release date: 2026-03-20
-
-Fixes #92, #89, and #90
-
-- Removed the broken Save to... menu entry from the editor. ExcaliDash already provides its own export flow, and the
-  upstream destination dialog was not supported.
-- Fixed shared-drawing undo so each user only undoes their own local changes instead of rolling back collaborator
-  updates.
-- Fixed a drawing-specific editor state issue that could break hand-tool or middle-mouse panning in some shared
-  drawings.
+| Area | Key Changes |
+|------|-------------|
+| **OIDC hardening** | ID token signing alg resolution with discovery fallback + explicit override (`OIDC_ID_TOKEN_SIGNED_RESPONSE_ALG`), token endpoint auth method override (`OIDC_TOKEN_ENDPOINT_AUTH_METHOD`), HS-alg mismatch auto-retry in callback, Keycloak/Authentik preflight warnings, `oidc-doctor.cjs` diagnostic tool, provider-specific `.env` example files |
+| **Admin OIDC controls** | Runtime JIT provisioning toggle via admin panel + DB (`oidcJitProvisioningEnabled` column + migration), OIDC-only invited user creation (`oidcOnly` flag), block self-registration toggle in `oidc_enforced` mode |
+| **HTTPS redirect policy** | Refactored into pure `httpsRedirectPolicy.ts` module, new `ENFORCE_HTTPS_REDIRECT` env var, mixed http/https `FRONTEND_URL` support, IPv4 loopback healthchecks |
+| **Frontend resilience** | `AuthStatusErrorPanel` with retry for backend connectivity failures, `registrationEnabled` propagation to hide register link/route, multi-image drag-and-drop import in Editor, Excalidraw asset copy script for dev + build |
 
 ## Upgrading
 
@@ -36,9 +32,9 @@ Edit `docker-compose.prod.yml` and pin the release tags:
 ```yaml
 services:
   backend:
-    image: zimengxiong/excalidash-backend:v0.4.28
+    image: zimengxiong/excalidash-backend:v0.5.0
   frontend:
-    image: zimengxiong/excalidash-frontend:v0.4.28
+    image: zimengxiong/excalidash-frontend:v0.5.0
 ```
 
 Example:
