@@ -15,6 +15,7 @@ export const isAxiosError = axios.isAxiosError;
 export { api as default };
 
 export type UpdateChannel = "stable" | "prerelease";
+export type RegistrationMode = "disabled" | "public" | "link_only";
 
 export type UpdateInfo = {
   currentVersion: string | null;
@@ -83,6 +84,7 @@ export interface AuthStatusResponse {
   authEnabled?: boolean;
   enabled?: boolean;
   registrationEnabled?: boolean;
+  registrationMode?: RegistrationMode;
   authMode?: "local" | "hybrid" | "oidc_enforced";
   oidcEnabled?: boolean;
   oidcEnforced?: boolean;
@@ -145,15 +147,25 @@ export const authRegister = async (
   email: string,
   password: string,
   name: string,
-  setupCode?: string
+  setupCode?: string,
+  signupToken?: string
 ): Promise<{ user: AuthUser }> => {
-  const payload: { email: string; password: string; name: string; setupCode?: string } = {
+  const payload: {
+    email: string;
+    password: string;
+    name: string;
+    setupCode?: string;
+    signupToken?: string;
+  } = {
     email,
     password,
     name,
   };
   if (typeof setupCode === "string" && setupCode.trim().length > 0) {
     payload.setupCode = setupCode.trim();
+  }
+  if (typeof signupToken === "string" && signupToken.trim().length > 0) {
+    payload.signupToken = signupToken.trim();
   }
   const response = await api.post<{ user: AuthUser }>(
     "/auth/register",

@@ -37,6 +37,7 @@ const baseAuthState = {
   register: vi.fn(),
   authEnabled: true,
   registrationEnabled: true,
+  registrationMode: 'public',
   authStatusError: null,
   retryAuthStatus: vi.fn(),
   oidcEnabled: false,
@@ -58,6 +59,7 @@ describe("auth page registration policy", () => {
     mockUseAuth.mockReturnValue({
       ...baseAuthState,
       registrationEnabled: false,
+      registrationMode: 'disabled',
     });
 
     render(
@@ -74,6 +76,7 @@ describe("auth page registration policy", () => {
     mockUseAuth.mockReturnValue({
       ...baseAuthState,
       registrationEnabled: false,
+      registrationMode: 'disabled',
     });
 
     render(
@@ -83,5 +86,23 @@ describe("auth page registration policy", () => {
     );
 
     expect(mockNavigate).toHaveBeenCalledWith("/login", { replace: true });
+  });
+
+  it("shows the invalid-link state on /register when link-only mode has no token", () => {
+    mockUseAuth.mockReturnValue({
+      ...baseAuthState,
+      registrationEnabled: false,
+      registrationMode: 'link_only',
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Register />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/signup link required/i)).toBeInTheDocument();
+    expect(screen.getByText(/only allows signup through an admin-issued link/i)).toBeInTheDocument();
+    expect(mockNavigate).not.toHaveBeenCalledWith("/login", { replace: true });
   });
 });

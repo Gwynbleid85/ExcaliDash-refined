@@ -12,17 +12,16 @@ Usage:
 
 Options:
   --username <name>       Docker Hub username or org. Can also use DOCKERHUB_USERNAME. Defaults to gwynbleidd85.
-  --tag <tag>             Image tag to publish. Defaults to VERSION file contents.
+  --tag <tag>             Image tag to publish. Must be strict semver (for example 0.4.28). Defaults to VERSION file contents.
   --repository <name>     Base repository name. Defaults to excalidash.
   --platforms <list>      buildx platforms. Defaults to linux/amd64,linux/arm64.
   --build-label <label>   Frontend build label. Defaults to production.
-  --latest                Also push :latest for both images.
   --builder <name>        buildx builder name. Defaults to excalidash-builder.
   -h, --help              Show this help.
 
 Examples:
-  scripts/build-and-push-dockerhub.sh --tag 0.4.28 --latest
-  DOCKERHUB_USERNAME=mydockeruser scripts/build-and-push-dockerhub.sh --tag custom-dev --build-label development
+  scripts/build-and-push-dockerhub.sh --tag 0.4.28
+  DOCKERHUB_USERNAME=mydockeruser scripts/build-and-push-dockerhub.sh --tag 1.2.3 --build-label production
 EOF
 }
 
@@ -31,7 +30,6 @@ IMAGE_NAME="excalidash"
 VERSION="$(tr -d '[:space:]' < VERSION)"
 PLATFORMS="linux/amd64,linux/arm64"
 BUILD_LABEL="production"
-PUSH_LATEST="false"
 BUILDER_NAME="excalidash-builder"
 
 while [[ $# -gt 0 ]]; do
@@ -55,10 +53,6 @@ while [[ $# -gt 0 ]]; do
     --build-label)
       BUILD_LABEL="${2:-}"
       shift 2
-      ;;
-    --latest)
-      PUSH_LATEST="true"
-      shift
       ;;
     --builder)
       BUILDER_NAME="${2:-}"
@@ -87,13 +81,18 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "ERROR: Image tag must be strict semver in the form X.Y.Z (for example 0.4.28)." >&2
+  exit 1
+fi
+
 echo "ExcaliDash Docker Hub Publisher"
 echo "Username:    $DOCKER_USERNAME"
 echo "Repository:  $IMAGE_NAME"
 echo "Tag:         $VERSION"
 echo "Platforms:   $PLATFORMS"
 echo "Build label: $BUILD_LABEL"
-echo "Push latest: $PUSH_LATEST"
+echo "Push latest: true"
 
 echo "Checking Docker authentication..."
 if ! docker info 2>/dev/null | grep -q '^ Username:'; then
@@ -111,16 +110,13 @@ fi
 
 BACKEND_TAG_ARGS=(
   --tag "$DOCKER_USERNAME/$IMAGE_NAME-backend:$VERSION"
+  --tag "$DOCKER_USERNAME/$IMAGE_NAME-backend:latest"
 )
 
 FRONTEND_TAG_ARGS=(
   --tag "$DOCKER_USERNAME/$IMAGE_NAME-frontend:$VERSION"
+  --tag "$DOCKER_USERNAME/$IMAGE_NAME-frontend:latest"
 )
-
-if [[ "$PUSH_LATEST" == "true" ]]; then
-  BACKEND_TAG_ARGS+=(--tag "$DOCKER_USERNAME/$IMAGE_NAME-backend:latest")
-  FRONTEND_TAG_ARGS+=(--tag "$DOCKER_USERNAME/$IMAGE_NAME-frontend:latest")
-fi
 
 echo "Building and pushing backend image..."
 docker buildx build \
@@ -143,8 +139,5 @@ docker buildx build \
 echo "Published images:"
 echo "  $DOCKER_USERNAME/$IMAGE_NAME-backend:$VERSION"
 echo "  $DOCKER_USERNAME/$IMAGE_NAME-frontend:$VERSION"
-
-if [[ "$PUSH_LATEST" == "true" ]]; then
-  echo "  $DOCKER_USERNAME/$IMAGE_NAME-backend:latest"
-  echo "  $DOCKER_USERNAME/$IMAGE_NAME-frontend:latest"
-fi
+echo "  $DOCKER_USERNAME/$IMAGE_NAME-backend:latest"
+echo "  $DOCKER_USERNAME/$IMAGE_NAME-frontend:latest"

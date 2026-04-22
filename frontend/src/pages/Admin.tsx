@@ -3,6 +3,7 @@ import { useBeforeUnload, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import * as api from '../api';
+import type { RegistrationMode } from '../api';
 import type { Collection } from '../types';
 import { UserPlus, RefreshCw, UserCog } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -24,6 +25,15 @@ type LoginRateLimitFormState = {
   enabled: boolean;
   windowMinutes: number;
   max: number;
+};
+
+type SignupLinkSummary = {
+  id: string;
+  createdByUserId: string;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 const sanitizePositiveInt = (value: number, fallback = 1) => {
@@ -58,11 +68,17 @@ export const Admin: React.FC = () => {
   const [resetPasswordResult, setResetPasswordResult] = useState<{ email: string; tempPassword: string } | null>(null);
 
   const [registrationEnabled, setRegistrationEnabled] = useState<boolean | null>(null);
+  const [registrationMode, setRegistrationMode] = useState<RegistrationMode | null>(null);
   const [localRegistrationAllowed, setLocalRegistrationAllowed] = useState(true);
   const [oidcEnabled, setOidcEnabled] = useState(false);
   const [oidcJitProvisioningEnabled, setOidcJitProvisioningEnabled] = useState<boolean | null>(null);
   const [oidcProviderName, setOidcProviderName] = useState<string | null>(null);
   const [registrationLoading, setRegistrationLoading] = useState(false);
+  const [signupLinks, setSignupLinks] = useState<SignupLinkSummary[]>([]);
+  const [signupLinkExpiryEnabled, setSignupLinkExpiryEnabled] = useState(false);
+  const [signupLinkExpiresAt, setSignupLinkExpiresAt] = useState('');
+  const [createdSignupUrl, setCreatedSignupUrl] = useState<string | null>(null);
+  const [revokeSignupLinkId, setRevokeSignupLinkId] = useState<string | null>(null);
 
   const [loginRateLimitLoading, setLoginRateLimitLoading] = useState(false);
   const [loginRateLimitSaving, setLoginRateLimitSaving] = useState(false);
@@ -136,12 +152,18 @@ export const Admin: React.FC = () => {
     try {
       const response = await api.api.get<{
         registrationEnabled: boolean;
+        registrationMode?: RegistrationMode;
         authMode?: 'local' | 'hybrid' | 'oidc_enforced';
         oidcEnabled?: boolean;
         oidcProvider?: string;
         oidcJitProvisioningEnabled?: boolean;
       }>('/auth/status');
       setRegistrationEnabled(Boolean(response.data.registrationEnabled));
+      setRegistrationMode(
+        response.data.registrationMode === 'public' || response.data.registrationMode === 'link_only'
+          ? response.data.registrationMode
+          : 'disabled'
+      );
       setLocalRegistrationAllowed(response.data.authMode !== 'oidc_enforced');
       setOidcEnabled(Boolean(response.data.oidcEnabled));
       setOidcProviderName(
@@ -163,19 +185,40 @@ export const Admin: React.FC = () => {
     }
   };
 
-  const toggleRegistration = async () => {
-    if (!isAdmin || registrationEnabled === null || !localRegistrationAllowed) return;
+  const loadSignupLinks = async () => {
+    try {
+      const response = await api.api.get<{ signupLinks: SignupLinkSummary[] }>('/auth/signup-links');
+      setSignupLinks(response.data.signupLinks || []);
+    } catch (err: unknown) {
+      let message = 'Failed to load signup links';
+      if (api.isAxiosError(err)) {
+        message = err.response?.data?.message || err.response?.data?.error || message;
+      }
+      setError(message);
+    }
+  };
+
+  const updateRegistrationMode = async (mode: RegistrationMode) => {
+    if (!isAdmin || registrationMode === null || !localRegistrationAllowed) return;
 
     setRegistrationLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      const response = await api.api.post<{ registrationEnabled: boolean }>('/auth/registration/toggle', {
-        enabled: !registrationEnabled,
-      });
+      const response = await api.api.post<{ registrationEnabled: boolean; registrationMode: RegistrationMode }>(
+        '/auth/registration/mode',
+        { mode }
+      );
       setRegistrationEnabled(Boolean(response.data.registrationEnabled));
-      setSuccess(response.data.registrationEnabled ? 'Registration enabled' : 'Registration disabled');
+      setRegistrationMode(response.data.registrationMode);
+      setSuccess(
+        response.data.registrationMode === 'public'
+          ? 'Public registration enabled'
+          : response.data.registrationMode === 'link_only'
+            ? 'Link-only signup enabled'
+            : 'Registration disabled'
+      );
     } catch (err: unknown) {
       let message = 'Failed to update registration setting';
       if (api.isAxiosError(err)) {
@@ -184,6 +227,62 @@ export const Admin: React.FC = () => {
       setError(message);
     } finally {
       setRegistrationLoading(false);
+    }
+  };
+
+  const createSignupLink = async () => {
+    if (!isAdmin) return;
+
+    setRegistrationLoading(true);
+    setError('');
+    setSuccess('');
+    setCreatedSignupUrl(null);
+
+    try {
+      const expiresAt = signupLinkExpiryEnabled && signupLinkExpiresAt
+        ? new Date(signupLinkExpiresAt).toISOString()
+        : null;
+      const response = await api.api.post<{ signupLink: SignupLinkSummary; signupUrl: string }>(
+        '/auth/signup-links',
+        { expiresAt }
+      );
+      setCreatedSignupUrl(response.data.signupUrl);
+      setSuccess('Signup link created');
+      setSignupLinks((current) => [response.data.signupLink, ...current]);
+    } catch (err: unknown) {
+      let message = 'Failed to create signup link';
+      if (api.isAxiosError(err)) {
+        message = err.response?.data?.message || err.response?.data?.error || message;
+      }
+      setError(message);
+    } finally {
+      setRegistrationLoading(false);
+    }
+  };
+
+  const revokeSignupLink = async (linkId: string) => {
+    if (!isAdmin) return;
+
+    setRevokeSignupLinkId(linkId);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await api.api.post<{ signupLink: SignupLinkSummary }>(
+        `/auth/signup-links/${linkId}/revoke`
+      );
+      setSignupLinks((current) =>
+        current.map((link) => (link.id === linkId ? response.data.signupLink : link))
+      );
+      setSuccess('Signup link revoked');
+    } catch (err: unknown) {
+      let message = 'Failed to revoke signup link';
+      if (api.isAxiosError(err)) {
+        message = err.response?.data?.message || err.response?.data?.error || message;
+      }
+      setError(message);
+    } finally {
+      setRevokeSignupLinkId(null);
     }
   };
 
@@ -336,6 +435,7 @@ export const Admin: React.FC = () => {
     void loadUsers();
     void loadLoginRateLimitConfig();
     void loadRegistrationStatus();
+    void loadSignupLinks();
   }, [authEnabled, isAdmin]);
 
   useEffect(() => {
@@ -714,13 +814,23 @@ export const Admin: React.FC = () => {
 
       <AccessControlCard
         registrationEnabled={registrationEnabled}
+        registrationMode={registrationMode}
         localRegistrationAllowed={localRegistrationAllowed}
         oidcEnabled={oidcEnabled}
         oidcProviderName={oidcProviderName}
         oidcJitProvisioningEnabled={oidcJitProvisioningEnabled}
+        signupLinks={signupLinks}
+        signupLinkExpiryEnabled={signupLinkExpiryEnabled}
+        signupLinkExpiresAt={signupLinkExpiresAt}
+        createdSignupUrl={createdSignupUrl}
+        revokeSignupLinkId={revokeSignupLinkId}
         loading={registrationLoading}
-        onToggleRegistration={toggleRegistration}
+        onRegistrationModeChange={updateRegistrationMode}
         onToggleOidcJitProvisioning={toggleOidcJitProvisioning}
+        onSignupLinkExpiryEnabledChange={setSignupLinkExpiryEnabled}
+        onSignupLinkExpiresAtChange={setSignupLinkExpiresAt}
+        onCreateSignupLink={createSignupLink}
+        onRevokeSignupLink={revokeSignupLink}
       />
 
       <LoginRateLimitCard

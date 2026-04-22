@@ -1,5 +1,5 @@
 import { PrismaClient } from "../generated/client";
-import { getEffectiveRegistrationEnabled } from "./accessPolicy";
+import { getEffectiveRegistrationEnabled, getEffectiveRegistrationMode } from "./accessPolicy";
 
 type AuthMode = "local" | "hybrid" | "oidc_enforced";
 
@@ -81,6 +81,7 @@ export const buildAuthStatusPayload = ({
   };
   systemConfig: {
     registrationEnabled: boolean;
+    registrationMode?: string | null;
   };
   effectiveAuthEnabled: boolean;
   oidcJitProvisioningEnabled: boolean;
@@ -105,8 +106,11 @@ export const buildAuthStatusPayload = ({
     oidcProvider: oidc.providerName,
     oidcJitProvisioningEnabled,
     registrationEnabled: effectiveAuthEnabled
-      ? getEffectiveRegistrationEnabled(authMode, systemConfig.registrationEnabled)
+      ? getEffectiveRegistrationEnabled(authMode, systemConfig)
       : false,
+    registrationMode: effectiveAuthEnabled
+      ? getEffectiveRegistrationMode(authMode, systemConfig)
+      : "disabled",
     bootstrapRequired: effectiveAuthEnabled ? bootstrapRequired : false,
     authOnboardingRequired: onboardingRequired,
     authOnboardingMode: onboardingMode,
@@ -129,23 +133,26 @@ export const upsertAuthModeState = async ({
   prisma,
   defaultSystemConfigId,
   registrationEnabled,
+  registrationMode,
   authEnabled,
   authOnboardingCompleted = true,
 }: {
   prisma: PrismaClient;
   defaultSystemConfigId: string;
   registrationEnabled: boolean;
+  registrationMode?: string;
   authEnabled: boolean;
   authOnboardingCompleted?: boolean;
 }) =>
   prisma.systemConfig.upsert({
     where: { id: defaultSystemConfigId },
-    update: { authEnabled, authOnboardingCompleted },
+    update: { authEnabled, authOnboardingCompleted, ...(registrationMode ? { registrationMode } : {}) },
     create: {
       id: defaultSystemConfigId,
       authEnabled,
       authOnboardingCompleted,
       registrationEnabled,
+      registrationMode: registrationMode ?? (registrationEnabled ? "public" : "disabled"),
     },
   });
 

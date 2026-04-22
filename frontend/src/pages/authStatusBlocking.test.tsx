@@ -28,6 +28,7 @@ const baseAuthState = {
   register: vi.fn(),
   authEnabled: true,
   registrationEnabled: true,
+  registrationMode: "public",
   authStatusError: "Unable to reach the backend API. Check BACKEND_URL and reverse proxy settings, then retry.",
   retryAuthStatus: vi.fn(),
   oidcEnabled: false,

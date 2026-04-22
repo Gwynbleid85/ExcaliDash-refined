@@ -8,6 +8,7 @@ import {
   authLogout,
   authLogin,
   authRegister,
+  type RegistrationMode,
   isAxiosError,
 } from '../api';
 
@@ -25,6 +26,7 @@ interface AuthContextType {
   loading: boolean;
   authEnabled: boolean | null;
   registrationEnabled: boolean;
+  registrationMode: RegistrationMode;
   authStatusError: string | null;
   authMode: 'local' | 'hybrid' | 'oidc_enforced';
   oidcEnabled: boolean;
@@ -34,7 +36,7 @@ interface AuthContextType {
   authOnboardingRequired: boolean;
   authOnboardingMode: 'migration' | 'fresh' | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, setupCode?: string) => Promise<void>;
+  register: (email: string, password: string, name: string, setupCode?: string, signupToken?: string) => Promise<void>;
   logout: () => void;
   retryAuthStatus: () => Promise<void>;
   isAuthenticated: boolean;
@@ -50,6 +52,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
   const [authEnabled, setAuthEnabled] = useState<boolean | null>(null);
   const [registrationEnabled, setRegistrationEnabled] = useState(false);
+  const [registrationMode, setRegistrationMode] = useState<RegistrationMode>('disabled');
   const [authStatusError, setAuthStatusError] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<'local' | 'hybrid' | 'oidc_enforced'>('local');
   const [oidcEnabled, setOidcEnabled] = useState(false);
@@ -77,6 +80,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setAuthEnabled(enabled);
         localStorage.setItem(AUTH_ENABLED_CACHE_KEY, String(enabled));
         setRegistrationEnabled(Boolean(statusResponse?.registrationEnabled));
+        setRegistrationMode(
+          statusResponse?.registrationMode === 'public' || statusResponse?.registrationMode === 'link_only'
+            ? statusResponse.registrationMode
+            : 'disabled'
+        );
         const nextAuthMode =
           statusResponse?.authMode === 'hybrid' || statusResponse?.authMode === 'oidc_enforced'
             ? statusResponse.authMode
@@ -104,6 +112,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setAuthStatusError(null);
           setAuthEnabled(false);
           setRegistrationEnabled(false);
+          setRegistrationMode('disabled');
           setAuthMode('local');
           setOidcEnabled(false);
           setOidcEnforced(false);
@@ -120,6 +129,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         );
         setAuthEnabled(null);
         setRegistrationEnabled(false);
+        setRegistrationMode('disabled');
         setAuthMode('local');
         setOidcEnabled(false);
         setOidcEnforced(false);
@@ -213,12 +223,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const register = async (email: string, password: string, name: string, setupCode?: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    name: string,
+    setupCode?: string,
+    signupToken?: string
+  ) => {
     try {
       if (authEnabled === false) {
         throw new Error("Authentication is disabled");
       }
-      const response = await authRegister(email, password, name, setupCode);
+      const response = await authRegister(email, password, name, setupCode, signupToken);
 
       const { user: userData } = response;
 
@@ -258,6 +274,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         loading,
         authEnabled,
         registrationEnabled,
+        registrationMode,
         authStatusError,
         authMode,
         oidcEnabled,

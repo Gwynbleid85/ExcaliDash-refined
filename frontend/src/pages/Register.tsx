@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Check, Copy } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Logo';
@@ -19,7 +19,7 @@ export const Register: React.FC = () => {
   const {
     register,
     authEnabled,
-    registrationEnabled,
+    registrationMode,
     authStatusError,
     retryAuthStatus,
     oidcEnabled,
@@ -31,6 +31,10 @@ export const Register: React.FC = () => {
     loading: authLoading,
   } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const signupToken = searchParams.get('signupToken')?.trim() || '';
+  const hasSignupToken = signupToken.length > 0;
+  const linkOnlyBlocked = !bootstrapRequired && registrationMode === 'link_only' && !hasSignupToken;
 
   const passwordPolicy = getPasswordPolicy();
 
@@ -73,7 +77,7 @@ export const Register: React.FC = () => {
       navigate('/', { replace: true });
       return;
     }
-    if (!bootstrapRequired && !registrationEnabled) {
+    if (!bootstrapRequired && registrationMode === 'disabled') {
       navigate('/login', { replace: true });
       return;
     }
@@ -89,7 +93,7 @@ export const Register: React.FC = () => {
     isAuthenticated,
     navigate,
     oidcEnforced,
-    registrationEnabled,
+    registrationMode,
   ]);
 
   if (authStatusError) {
@@ -113,7 +117,13 @@ export const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      await register(email, password, name, bootstrapRequired ? setupCode : undefined);
+      await register(
+        email,
+        password,
+        name,
+        bootstrapRequired ? setupCode : undefined,
+        hasSignupToken ? signupToken : undefined
+      );
       navigate('/');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to register';
@@ -134,13 +144,21 @@ export const Register: React.FC = () => {
         <div className="text-center mb-8">
           <Logo className="mx-auto h-12 w-auto" />
           <h2 className="ex-title mt-5 text-3xl">
-            {bootstrapRequired ? 'Set up admin account' : 'Create your account'}
+            {bootstrapRequired
+              ? 'Set up admin account'
+              : linkOnlyBlocked
+                ? 'Signup link required'
+                : 'Create your account'}
           </h2>
           <p className="mt-2 text-sm text-ex-text-muted">
             {bootstrapRequired ? (
               <span>
                 Set up your first admin account to finish enabling multi-user access for this
                 ExcaliDash instance.
+              </span>
+            ) : linkOnlyBlocked ? (
+              <span>
+                This ExcaliDash instance only allows signup through an admin-issued link.
               </span>
             ) : (
               <>
@@ -181,6 +199,20 @@ export const Register: React.FC = () => {
         </div>
 
         <div className="ex-island p-6 sm:p-8">
+          {linkOnlyBlocked ? (
+            <div className="space-y-4">
+              <div className="rounded-ex border border-ex-warning bg-ex-warning-soft p-4 text-sm text-ex-text">
+                A valid signup link is required to create an account here. Ask your admin for the
+                onboarding link and open it directly.
+              </div>
+              <Link
+                to="/login"
+                className="ex-btn ex-btn-ghost w-full h-11 inline-flex items-center justify-center"
+              >
+                Back to login
+              </Link>
+            </div>
+          ) : (
           <form className="space-y-5" onSubmit={handleSubmit}>
             {error && (
               <div className="rounded-ex border border-ex-danger bg-ex-danger-soft p-3 text-sm text-ex-danger font-medium">
@@ -275,6 +307,7 @@ export const Register: React.FC = () => {
               {loading ? 'Creating account…' : 'Create account'}
             </button>
           </form>
+          )}
         </div>
       </div>
     </div>
