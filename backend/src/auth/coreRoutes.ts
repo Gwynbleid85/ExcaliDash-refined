@@ -17,6 +17,7 @@ import {
 } from "./bootstrapSetupCode";
 import {
   getEffectiveOidcJitProvisioning,
+  getEffectiveRegistrationMode,
 } from "./accessPolicy";
 import {
   buildAuthStatusPayload,
@@ -26,6 +27,7 @@ import {
   upsertAuthModeState,
 } from "./coreRouteHelpers";
 import { canUseLocalPasswordFlows } from "./localPassword";
+import { getSignupLinkLookupCandidates } from "./signupLinks";
 
 type RegisterCoreRoutesDeps = {
   router: express.Router;
@@ -39,6 +41,7 @@ type RegisterCoreRoutesDeps = {
     authEnabled: boolean;
     authOnboardingCompleted: boolean;
     registrationEnabled: boolean;
+    registrationMode?: string | null;
     oidcJitProvisioningEnabled: boolean | null;
   }>;
   findUserByIdentifier: (identifier: string) => Promise<{
@@ -161,9 +164,10 @@ export const registerCoreRoutes = (deps: RegisterCoreRoutesDeps) => {
         });
       }
 
-      const { email, password, name, username, setupCode } = parsed.data;
+      const { email, password, name, username, setupCode, signupToken } = parsed.data;
 
       const systemConfig = await ensureSystemConfig();
+      const registrationMode = getEffectiveRegistrationMode(config.authMode, systemConfig);
 
       const activeUsers = await prisma.user.count({ where: { isActive: true } });
       const bootstrapUser = await prisma.user.findUnique({
@@ -329,16 +333,53 @@ export const registerCoreRoutes = (deps: RegisterCoreRoutesDeps) => {
             role: user.role,
             mustResetPassword: user.mustResetPassword,
           },
-          registrationEnabled: systemConfig.registrationEnabled,
+          registrationEnabled: registrationMode === "public",
+          registrationMode,
           bootstrapped: true,
         });
       }
 
-      if (!systemConfig.registrationEnabled) {
+      if (registrationMode === "disabled") {
         return res.status(403).json({
           error: "Forbidden",
           message: "User registration is disabled.",
         });
+      }
+
+      if (registrationMode === "link_only") {
+        if (!signupToken) {
+          return res.status(403).json({
+            error: "Forbidden",
+            message: "A valid signup link is required to register.",
+          });
+        }
+
+        const signupLink = await prisma.signupLink.findFirst({
+          where: {
+            OR: getSignupLinkLookupCandidates(signupToken).map((candidate) => ({
+              tokenHash: candidate,
+            })),
+          },
+          select: {
+            id: true,
+            expiresAt: true,
+            revokedAt: true,
+          },
+        });
+
+        if (!signupLink || signupLink.revokedAt) {
+          return res.status(401).json({
+            error: "Unauthorized",
+            message: "Invalid signup link.",
+          });
+        }
+
+        if (signupLink.expiresAt && new Date() > signupLink.expiresAt) {
+          return res.status(401).json({
+            error: "Unauthorized",
+            message: "This signup link has expired.",
+          });
+        }
       }
 
       const existingUser = await prisma.user.findUnique({
@@ -443,7 +484,8 @@ export const registerCoreRoutes = (deps: RegisterCoreRoutesDeps) => {
           role: user.role,
           mustResetPassword: user.mustResetPassword,
         },
-        registrationEnabled: systemConfig.registrationEnabled,
+        registrationEnabled: registrationMode === "public",
+        registrationMode,
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -967,6 +1009,12 @@ export const registerCoreRoutes = (deps: RegisterCoreRoutesDeps) => {
         prisma,
         defaultSystemConfigId,
         registrationEnabled: systemConfig.registrationEnabled,
+        registrationMode:
+          typeof systemConfig.registrationMode === "string"
+            ? systemConfig.registrationMode
+            : systemConfig.registrationEnabled
+              ? "public"
+              : "disabled",
         authEnabled: nextAuthEnabled,
       });
 
@@ -1039,6 +1087,12 @@ export const registerCoreRoutes = (deps: RegisterCoreRoutesDeps) => {
         prisma,
         defaultSystemConfigId,
         registrationEnabled: systemConfig.registrationEnabled,
+        registrationMode:
+          typeof systemConfig.registrationMode === "string"
+            ? systemConfig.registrationMode
+            : systemConfig.registrationEnabled
+              ? "public"
+              : "disabled",
         authEnabled: next,
       });
       clearAuthEnabledCache();

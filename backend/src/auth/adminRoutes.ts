@@ -10,9 +10,15 @@ import {
   loginRateLimitResetSchema,
   loginRateLimitUpdateSchema,
   oidcJitProvisioningToggleSchema,
-  registrationToggleSchema,
+  registrationModeSchema,
+  signupLinkCreateSchema,
 } from "./schemas";
-import { getEffectiveOidcJitProvisioning } from "./accessPolicy";
+import { getEffectiveOidcJitProvisioning, getEffectiveRegistrationMode } from "./accessPolicy";
+import {
+  buildSignupLinkUrl,
+  generateSignupLinkToken,
+  hashSignupLinkToken,
+} from "./signupLinks";
 import { hashTokenForStorage } from "./tokenSecurity";
 
 type RegisterAdminRoutesDeps = {
@@ -23,6 +29,8 @@ type RegisterAdminRoutesDeps = {
   ensureAuthEnabled: (res: Response) => Promise<boolean>;
   ensureSystemConfig: () => Promise<{
     id: string;
+    registrationEnabled?: boolean;
+    registrationMode?: string | null;
     oidcJitProvisioningEnabled: boolean | null;
     authLoginRateLimitEnabled: boolean;
     authLoginRateLimitWindowMs: number;
@@ -64,6 +72,7 @@ type RegisterAdminRoutesDeps = {
   getRefreshTokenExpiresAt: () => Date;
   config: {
     authMode: "local" | "hybrid" | "oidc_enforced";
+    frontendUrl?: string;
     enableAuditLogging: boolean;
     enableRefreshTokenRotation: boolean;
     oidc: {
@@ -147,7 +156,14 @@ export const registerAdminRoutes = (deps: RegisterAdminRoutesDeps) => {
     };
   };
 
-  router.post("/registration/toggle", requireAuth, async (req: Request, res: Response) => {
+  const parseExpiresAt = (value: string | null | undefined): Date | null => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed;
+  };
+
+  router.post("/registration/mode", requireAuth, async (req: Request, res: Response) => {
     try {
       if (!(await ensureAuthEnabled(res))) return;
       if (!requireCsrf(req, res)) return;
@@ -160,23 +176,149 @@ export const registerAdminRoutes = (deps: RegisterAdminRoutesDeps) => {
         });
       }
 
-      const parsed = registrationToggleSchema.safeParse(req.body);
+      const parsed = registrationModeSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ error: "Bad request", message: "Invalid toggle payload" });
+        return res.status(400).json({ error: "Bad request", message: "Invalid registration mode payload" });
       }
 
       const updated = await prisma.systemConfig.upsert({
         where: { id: defaultSystemConfigId },
-        update: { registrationEnabled: parsed.data.enabled },
-        create: { id: defaultSystemConfigId, registrationEnabled: parsed.data.enabled },
+        update: {
+          registrationMode: parsed.data.mode,
+          registrationEnabled: parsed.data.mode === "public",
+        },
+        create: {
+          id: defaultSystemConfigId,
+          registrationMode: parsed.data.mode,
+          registrationEnabled: parsed.data.mode === "public",
+        },
       });
 
-      res.json({ registrationEnabled: updated.registrationEnabled });
+      res.json({
+        registrationEnabled: updated.registrationEnabled,
+        registrationMode: getEffectiveRegistrationMode(config.authMode, updated),
+      });
     } catch (error) {
-      console.error("Registration toggle error:", error);
+      console.error("Registration mode error:", error);
       res.status(500).json({
         error: "Internal server error",
         message: "Failed to update registration setting",
+      });
+    }
+  });
+
+  router.get("/signup-links", requireAuth, async (req: Request, res: Response) => {
+    try {
+      if (!(await ensureAuthEnabled(res))) return;
+      if (!requireAdmin(req, res)) return;
+
+      const links = await prisma.signupLink.findMany({
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          createdByUserId: true,
+          expiresAt: true,
+          revokedAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return res.json({ signupLinks: links });
+    } catch (error) {
+      console.error("List signup links error:", error);
+      return res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to load signup links",
+      });
+    }
+  });
+
+  router.post("/signup-links", requireAuth, async (req: Request, res: Response) => {
+    try {
+      if (!(await ensureAuthEnabled(res))) return;
+      if (!requireCsrf(req, res)) return;
+      if (!requireAdmin(req, res)) return;
+
+      const parsed = signupLinkCreateSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Bad request", message: "Invalid signup link payload" });
+      }
+
+      const expiresAt = parseExpiresAt(parsed.data.expiresAt);
+      if (parsed.data.expiresAt && !expiresAt) {
+        return res.status(400).json({ error: "Bad request", message: "Invalid signup link expiry" });
+      }
+      if (expiresAt && expiresAt <= new Date()) {
+        return res.status(400).json({ error: "Bad request", message: "Signup link expiry must be in the future" });
+      }
+
+      const token = generateSignupLinkToken();
+      const created = await prisma.signupLink.create({
+        data: {
+          tokenHash: hashSignupLinkToken(token),
+          createdByUserId: req.user.id,
+          expiresAt,
+        },
+        select: {
+          id: true,
+          createdByUserId: true,
+          expiresAt: true,
+          revokedAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return res.status(201).json({
+        signupLink: created,
+        signupUrl: buildSignupLinkUrl(token, config.frontendUrl),
+      });
+    } catch (error) {
+      console.error("Create signup link error:", error);
+      return res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to create signup link",
+      });
+    }
+  });
+
+  router.post("/signup-links/:id/revoke", requireAuth, async (req: Request, res: Response) => {
+    try {
+      if (!(await ensureAuthEnabled(res))) return;
+      if (!requireCsrf(req, res)) return;
+      if (!requireAdmin(req, res)) return;
+
+      const existing = await prisma.signupLink.findUnique({
+        where: { id: req.params.id },
+        select: { id: true, revokedAt: true },
+      });
+      if (!existing) {
+        return res.status(404).json({ error: "Not found", message: "Signup link not found" });
+      }
+
+      const revoked =
+        existing.revokedAt
+          ? existing
+          : await prisma.signupLink.update({
+              where: { id: req.params.id },
+              data: { revokedAt: new Date() },
+              select: {
+                id: true,
+                createdByUserId: true,
+                expiresAt: true,
+                revokedAt: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            });
+
+      return res.json({ signupLink: revoked });
+    } catch (error) {
+      console.error("Revoke signup link error:", error);
+      return res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to revoke signup link",
       });
     }
   });

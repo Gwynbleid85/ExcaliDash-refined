@@ -24,6 +24,7 @@ model User {
   drawingPermissions  DrawingPermission[]
   passwordResetTokens PasswordResetToken[]
   refreshTokens       RefreshToken[]
+  createdSignupLinks  SignupLink[]
   auditLogs           AuditLog[]
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
@@ -34,6 +35,7 @@ model SystemConfig {
   authEnabled                Boolean  @default(false)
   authOnboardingCompleted    Boolean  @default(false)
   registrationEnabled        Boolean  @default(false)
+  registrationMode           String   @default("disabled")
   oidcJitProvisioningEnabled Boolean?
   authLoginRateLimitEnabled  Boolean  @default(true)
   authLoginRateLimitWindowMs Int      @default(900000) // 15 minutes
@@ -171,4 +173,18 @@ model AuthIdentity {
   @@unique([issuer, subject])
   @@unique([provider, userId])
   @@index([userId])
+}
+
+model SignupLink {
+  id              String   @id @default(uuid())
+  tokenHash       String   @unique
+  createdByUserId String
+  createdByUser   User     @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([createdByUserId])
+  @@index([revokedAt, expiresAt])
 }

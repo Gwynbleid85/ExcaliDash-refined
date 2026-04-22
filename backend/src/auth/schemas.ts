@@ -18,6 +18,7 @@ export const registerSchema = z.object({
   password: passwordSchema,
   name: z.string().trim().min(1).max(100),
   setupCode: z.string().trim().min(1).max(64).optional(),
+  signupToken: z.string().trim().min(1).max(512).optional(),
 });
 
 export const loginSchema = z
@@ -31,8 +32,12 @@ export const loginSchema = z
     message: "identifier/email/username is required",
   });
 
-export const registrationToggleSchema = z.object({
-  enabled: z.boolean(),
+export const registrationModeSchema = z.object({
+  mode: z.enum(["disabled", "public", "link_only"]),
+});
+
+export const signupLinkCreateSchema = z.object({
+  expiresAt: z.string().datetime().optional().nullable(),
 });
 
 export const oidcJitProvisioningToggleSchema = z.object({

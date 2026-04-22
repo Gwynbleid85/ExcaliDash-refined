@@ -14,6 +14,12 @@ const buildApp = (options?: {
     systemConfig: {
       upsert: vi.fn(),
     },
+    signupLink: {
+      create: vi.fn(),
+      findMany: vi.fn().mockResolvedValue([]),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
     user: {
       findUnique: vi.fn(),
       findFirst: vi.fn(),
@@ -37,6 +43,8 @@ const buildApp = (options?: {
     ensureAuthEnabled: vi.fn().mockResolvedValue(true),
     ensureSystemConfig: vi.fn().mockResolvedValue({
       id: "default",
+      registrationEnabled: false,
+      registrationMode: "disabled",
       oidcJitProvisioningEnabled: null,
       authLoginRateLimitEnabled: true,
       authLoginRateLimitWindowMs: 900000,
@@ -54,6 +62,7 @@ const buildApp = (options?: {
     getRefreshTokenExpiresAt: vi.fn().mockReturnValue(new Date()),
     config: {
       authMode: options?.authMode ?? "oidc_enforced",
+      frontendUrl: "https://app.example.com",
       enableAuditLogging: false,
       enableRefreshTokenRotation: false,
       oidc: {
@@ -77,13 +86,35 @@ describe("admin OIDC access controls", () => {
     vi.restoreAllMocks();
   });
 
-  it("rejects local registration toggle in oidc_enforced mode", async () => {
+  it("rejects local registration mode updates in oidc_enforced mode", async () => {
     const { app } = buildApp({ authMode: "oidc_enforced", oidcEnabled: true });
 
-    const response = await request(app).post("/registration/toggle").send({ enabled: true });
+    const response = await request(app).post("/registration/mode").send({ mode: "public" });
 
     expect(response.status).toBe(409);
     expect(response.body?.message).toContain("Local self-sign-up");
+  });
+
+  it("updates the persisted local registration mode", async () => {
+    const { app, prisma } = buildApp({ authMode: "local", oidcEnabled: false });
+    prisma.systemConfig.upsert.mockResolvedValue({
+      id: "default",
+      registrationEnabled: false,
+      registrationMode: "link_only",
+    });
+
+    const response = await request(app)
+      .post("/registration/mode")
+      .send({ mode: "link_only" });
+
+    expect(response.status).toBe(200);
+    expect(prisma.systemConfig.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: { registrationMode: "link_only", registrationEnabled: false },
+      })
+    );
+    expect(response.body?.registrationMode).toBe("link_only");
+    expect(response.body?.registrationEnabled).toBe(false);
   });
 
   it("updates the persisted OIDC JIT provisioning override", async () => {
@@ -104,6 +135,50 @@ describe("admin OIDC access controls", () => {
       })
     );
     expect(response.body?.oidcJitProvisioningEnabled).toBe(false);
+  });
+
+  it("creates a reusable signup link and returns a full signup URL", async () => {
+    const { app, prisma } = buildApp({ authMode: "local", oidcEnabled: false });
+    prisma.signupLink.create.mockResolvedValue({
+      id: "signup-link-1",
+      createdByUserId: "admin-id",
+      expiresAt: null,
+      revokedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const response = await request(app).post("/signup-links").send({ expiresAt: null });
+
+    expect(response.status).toBe(201);
+    expect(prisma.signupLink.create).toHaveBeenCalled();
+    expect(response.body?.signupUrl).toContain("https://app.example.com/register?signupToken=");
+  });
+
+  it("revokes a signup link", async () => {
+    const { app, prisma } = buildApp({ authMode: "local", oidcEnabled: false });
+    prisma.signupLink.findUnique.mockResolvedValue({
+      id: "signup-link-1",
+      revokedAt: null,
+    });
+    prisma.signupLink.update.mockResolvedValue({
+      id: "signup-link-1",
+      createdByUserId: "admin-id",
+      expiresAt: null,
+      revokedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const response = await request(app).post("/signup-links/signup-link-1/revoke").send({});
+
+    expect(response.status).toBe(200);
+    expect(prisma.signupLink.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "signup-link-1" },
+      })
+    );
+    expect(response.body?.signupLink?.revokedAt).toBeTruthy();
   });
 
   it("creates an invited OIDC-only user without a local password", async () => {

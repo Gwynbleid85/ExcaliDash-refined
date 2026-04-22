@@ -34,6 +34,7 @@ export const createAuthModeService = (
         authEnabled: config.authMode !== "local",
         authOnboardingCompleted: false,
         registrationEnabled: false,
+        registrationMode: "disabled",
         oidcJitProvisioningEnabled: null,
         authLoginRateLimitEnabled: true,
         authLoginRateLimitWindowMs: 15 * 60 * 1000,

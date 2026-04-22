@@ -6,6 +6,7 @@ import { registerCoreRoutes } from "./coreRoutes";
 const buildApp = (options?: {
   authMode?: "local" | "hybrid" | "oidc_enforced";
   registrationEnabled?: boolean;
+  registrationMode?: "disabled" | "public" | "link_only";
   oidcJitProvisioningEnabled?: boolean | null;
 }) => {
   const router = express.Router();
@@ -35,6 +36,7 @@ const buildApp = (options?: {
       authEnabled: true,
       authOnboardingCompleted: true,
       registrationEnabled: options?.registrationEnabled ?? true,
+      registrationMode: options?.registrationMode ?? (options?.registrationEnabled === false ? "disabled" : "public"),
       oidcJitProvisioningEnabled: options?.oidcJitProvisioningEnabled ?? null,
     }),
     findUserByIdentifier: vi.fn(),
@@ -82,6 +84,7 @@ describe("/auth/status registration policy", () => {
     const { app } = buildApp({
       authMode: "oidc_enforced",
       registrationEnabled: true,
+      registrationMode: "public",
       oidcJitProvisioningEnabled: false,
     });
 
@@ -90,6 +93,7 @@ describe("/auth/status registration policy", () => {
     expect(response.status).toBe(200);
     expect(response.body?.authMode).toBe("oidc_enforced");
     expect(response.body?.registrationEnabled).toBe(false);
+    expect(response.body?.registrationMode).toBe("disabled");
     expect(response.body?.oidcJitProvisioningEnabled).toBe(false);
   });
 
@@ -129,6 +133,7 @@ describe("/auth/status registration policy", () => {
         authEnabled: false,
         authOnboardingCompleted: false,
         registrationEnabled: true,
+        registrationMode: "public",
         oidcJitProvisioningEnabled: null,
       }),
       findUserByIdentifier: vi.fn(),
