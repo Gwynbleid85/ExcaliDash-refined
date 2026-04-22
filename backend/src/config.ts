@@ -39,6 +39,7 @@ interface OidcConfig {
   clientSecret: string | null;
   redirectUri: string | null;
   idTokenSignedResponseAlg: string | null;
+  tokenEndpointAuthMethod: "none" | "client_secret_basic" | "client_secret_post" | null;
   scopes: string;
   emailClaim: string;
   emailVerifiedClaim: string;
@@ -89,6 +90,26 @@ const getOptionalOidcSigningAlg = (key: string): string | null => {
   }
 
   return normalized;
+};
+
+const getOptionalOidcTokenEndpointAuthMethod = (
+  key: string
+): "none" | "client_secret_basic" | "client_secret_post" | null => {
+  const raw = process.env[key];
+  if (!raw) return null;
+  const normalized = raw.trim();
+  if (normalized.length === 0) return null;
+  if (
+    normalized === "none" ||
+    normalized === "client_secret_basic" ||
+    normalized === "client_secret_post"
+  ) {
+    return normalized;
+  }
+
+  throw new Error(
+    `${key} must be one of: none, client_secret_basic, client_secret_post`
+  );
 };
 
 const resolveJwtSecret = (nodeEnv: string): string => {
@@ -202,10 +223,47 @@ const resolveOidcConfig = (authMode: AuthMode): OidcConfig => {
   const idTokenSignedResponseAlg = enabled
     ? getOptionalOidcSigningAlg("OIDC_ID_TOKEN_SIGNED_RESPONSE_ALG")
     : null;
+  const tokenEndpointAuthMethod = enabled
+    ? getOptionalOidcTokenEndpointAuthMethod("OIDC_TOKEN_ENDPOINT_AUTH_METHOD")
+    : null;
   if (enabled && idTokenSignedResponseAlg && /^HS/i.test(idTokenSignedResponseAlg) && !clientSecret) {
     throw new Error(
       "OIDC_ID_TOKEN_SIGNED_RESPONSE_ALG using HS* requires OIDC_CLIENT_SECRET for a confidential client"
     );
+  }
+  if (enabled && tokenEndpointAuthMethod?.startsWith("client_secret_") && !clientSecret) {
+    throw new Error(
+      "OIDC_TOKEN_ENDPOINT_AUTH_METHOD using client_secret_* requires OIDC_CLIENT_SECRET"
+    );
+  }
+  if (enabled && tokenEndpointAuthMethod === "none" && clientSecret) {
+    console.warn(
+      "[config] OIDC_TOKEN_ENDPOINT_AUTH_METHOD=none is set while OIDC_CLIENT_SECRET is provided. " +
+        "This usually means your IdP client should be configured as public (no client secret)."
+    );
+  }
+  if (enabled && issuerUrl) {
+    const issuerLower = issuerUrl.toLowerCase();
+    const providerNameLower = getOptionalEnv("OIDC_PROVIDER_NAME", "OIDC").toLowerCase();
+    if (
+      providerNameLower.includes("keycloak") &&
+      !/\/realms\/[^/]+\/?$/i.test(issuerUrl)
+    ) {
+      console.warn(
+        "[config] OIDC_PROVIDER_NAME=Keycloak usually requires issuer format https://<host>/realms/<realm>."
+      );
+    }
+    if (
+      providerNameLower.includes("authentik") &&
+      !/\/application\/o\/[^/]+\/?$/i.test(issuerUrl)
+    ) {
+      console.warn(
+        "[config] OIDC_PROVIDER_NAME=Authentik usually requires issuer format https://<host>/application/o/<provider-slug>/."
+      );
+    }
+    if (!issuerLower.startsWith("http://") && !issuerLower.startsWith("https://")) {
+      console.warn("[config] OIDC_ISSUER_URL should start with http:// or https://.");
+    }
   }
 
   return {
@@ -217,6 +275,7 @@ const resolveOidcConfig = (authMode: AuthMode): OidcConfig => {
     clientSecret,
     redirectUri,
     idTokenSignedResponseAlg,
+    tokenEndpointAuthMethod,
     scopes: getOptionalEnv("OIDC_SCOPES", "openid profile email"),
     emailClaim: getOptionalEnv("OIDC_EMAIL_CLAIM", "email"),
     emailVerifiedClaim: getOptionalEnv("OIDC_EMAIL_VERIFIED_CLAIM", "email_verified"),
