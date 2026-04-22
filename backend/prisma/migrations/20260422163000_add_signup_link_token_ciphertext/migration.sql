@@ -1,0 +1,4 @@
+-- Restores a migration directory that exists in some local Prisma migration histories.
+-- The signup-link schema landed in
+-- 20260422150000_add_signup_links_and_registration_mode, so this migration is
+-- intentionally a no-op.
